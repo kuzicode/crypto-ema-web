@@ -150,6 +150,101 @@ class TradingBot:
         except Exception as e:
             app.logger.error(f"计算 {self.symbol} MACD时出错: {e}")
             return self.data
+            
+    def generate_market_analysis(self):
+        """生成市场分析和买入建议"""
+        try:
+            if self.indicators.empty:
+                return None
+                
+            df = self.indicators
+            # 获取最近的数据点
+            latest = df.iloc[-1]
+            prev = df.iloc[-2]
+            
+            # 市场分析
+            analysis = {
+                "latest_close": latest["Close"],
+                "latest_time": latest.name.strftime('%Y-%m-%d %H:%M') if hasattr(latest.name, 'strftime') else "最新",
+                "ma30": latest["MA30"],
+                "ma72": latest["MA72"],
+                "ma2": latest["MA2"],
+                "macd": latest["MACD"],
+                "signal": latest["Signal Line"],
+                "histogram": latest["MACD Histogram"],
+                "prev_histogram": prev["MACD Histogram"],
+                "trend": "",
+                "signal_type": "",
+                "risk_level": "",
+                "suggestion": ""
+            }
+            
+            # 趋势判断
+            if latest["Close"] > latest["MA2"]:
+                if latest["Close"] > latest["MA3"]:
+                    analysis["trend"] = "强势上升"
+                else:
+                    analysis["trend"] = "上升"
+            elif latest["Close"] < latest["MA2"]:
+                if latest["Close"] < latest["MA5"]:
+                    analysis["trend"] = "强势下降"
+                else:
+                    analysis["trend"] = "下降"
+            else:
+                analysis["trend"] = "横盘整理"
+            
+            # MACD信号类型
+            if latest["MACD"] > latest["Signal Line"]:
+                if latest["MACD Histogram"] > prev["MACD Histogram"]:
+                    analysis["signal_type"] = "金叉后动能增强"
+                else:
+                    analysis["signal_type"] = "金叉"
+            else:
+                if latest["MACD Histogram"] < prev["MACD Histogram"]:
+                    analysis["signal_type"] = "死叉后动能增强"
+                else:
+                    analysis["signal_type"] = "死叉"
+            
+            # 风险水平
+            price_volatility = (latest["High"] - latest["Low"]) / latest["Close"] * 100
+            if price_volatility > 5:
+                analysis["risk_level"] = "高"
+            elif price_volatility > 2:
+                analysis["risk_level"] = "中"
+            else:
+                analysis["risk_level"] = "低"
+            
+            # 买入建议
+            if analysis["trend"] == "强势上升" and analysis["signal_type"] == "金叉后动能增强":
+                analysis["suggestion"] = "强烈买入"
+            elif analysis["trend"] == "上升" and analysis["signal_type"] == "金叉":
+                analysis["suggestion"] = "买入"
+            elif analysis["trend"] == "下降" and analysis["signal_type"] == "死叉":
+                analysis["suggestion"] = "卖出"
+            elif analysis["trend"] == "强势下降" and analysis["signal_type"] == "死叉后动能增强":
+                analysis["suggestion"] = "强烈卖出"
+            elif analysis["trend"] == "横盘整理":
+                analysis["suggestion"] = "观望"
+            elif analysis["trend"] == "上升" and analysis["signal_type"] == "死叉":
+                analysis["suggestion"] = "减仓"
+            elif analysis["trend"] == "下降" and analysis["signal_type"] == "金叉":
+                analysis["suggestion"] = "谨慎买入"
+            else:
+                analysis["suggestion"] = "观望"
+                
+            # 添加支撑和阻力位
+            last_50 = df.iloc[-50:]
+            support = last_50["Low"].min()
+            resistance = last_50["High"].max()
+            
+            analysis["support"] = support
+            analysis["resistance"] = resistance
+            
+            return analysis
+            
+        except Exception as e:
+            app.logger.error(f"生成市场分析时出错: {e}")
+            return None
 
     def generate_plot(self):
         try:
@@ -253,8 +348,23 @@ def get_chart():
         
         if error:
             return jsonify({'success': False, 'error': error})
+            
+        # 获取市场分析
+        market_analysis = bot.generate_market_analysis()
         
-        return jsonify({'success': True, 'image': img_str})
+        # 获取当前最新价格
+        market_info = {
+            "price": f"{bot.indicators['Close'].iloc[-1]:.2f} USDT",
+            "change_24h": "计算中...",  # 这里需要另外计算24小时变化
+            "volume_24h": f"{bot.indicators['Volume'].iloc[-1]:.2f}"
+        }
+        
+        return jsonify({
+            'success': True, 
+            'image': img_str,
+            'market_info': market_info,
+            'analysis': market_analysis
+        })
     except Exception as e:
         app.logger.error(f"处理请求时出错: {e}")
         return jsonify({'success': False, 'error': str(e)})

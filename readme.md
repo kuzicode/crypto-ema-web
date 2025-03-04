@@ -16,26 +16,13 @@ source .venv/bin/activate  # Linux/Mac
 # .venv\Scripts\activate
 ```
 
-2. 创建必要的文件:
-
-- 将`app.py`内容复制到`app.py`文件
-- 创建`templates`目录，并将`index.html`内容复制到`templates/index.html`文件
-- 创建以下`requirements.txt`文件：
-
-```
-flask
-pandas
-matplotlib
-requests
-```
-
-3. 安装依赖项:
+2. 安装依赖项:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. 运行应用程序:
+3. 运行应用程序:
 
 ```bash
 flask run --host=0.0.0.0 --port=6969
@@ -47,7 +34,7 @@ flask run --host=0.0.0.0 --port=6969
 python app.py
 ```
 
-5. 在浏览器中访问:
+4. 在浏览器中访问:
 
 ```
 http://localhost:6969

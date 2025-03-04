@@ -543,19 +543,55 @@
                                 </span>
                                 <span class="data-value" id="current-price">--</span>
                             </div>
+                        </div>
+                        
+                        <!-- 在 market-info 卡片后添加新的分析卡片 -->
+                        <div id="market-analysis" class="info-card" style="display: none;">
+                            <h3>
+                                <span class="zh">市场分析</span>
+                                <span class="en">Market Analysis</span>
+                            </h3>
                             <div class="data-row">
                                 <span class="data-label">
-                                    <span class="zh">24小时变化</span>
-                                    <span class="en">24h</span>
+                                    <span class="zh">市场趋势</span>
+                                    <span class="en">Trend</span>
                                 </span>
-                                <span class="data-value" id="price-change">--</span>
+                                <span class="data-value" id="market-trend">--</span>
                             </div>
                             <div class="data-row">
                                 <span class="data-label">
-                                    <span class="zh">交易量</span>
-                                    <span class="en">Vol</span>
+                                    <span class="zh">MACD信号</span>
+                                    <span class="en">MACD Signal</span>
                                 </span>
-                                <span class="data-value" id="volume">--</span>
+                                <span class="data-value" id="macd-signal">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">
+                                    <span class="zh">风险等级</span>
+                                    <span class="en">Risk Level</span>
+                                </span>
+                                <span class="data-value" id="risk-level">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">
+                                    <span class="zh">建议操作</span>
+                                    <span class="en">Suggestion</span>
+                                </span>
+                                <span class="data-value glow" id="trading-suggestion">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">
+                                    <span class="zh">支撑位</span>
+                                    <span class="en">Support</span>
+                                </span>
+                                <span class="data-value" id="support-level">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">
+                                    <span class="zh">阻力位</span>
+                                    <span class="en">Resistance</span>
+                                </span>
+                                <span class="data-value" id="resistance-level">--</span>
                             </div>
                         </div>
                         
@@ -711,9 +747,22 @@
                         // 更新市场信息
                         if (data.market_info) {
                             document.getElementById('current-price').textContent = data.market_info.price;
-                            document.getElementById('price-change').textContent = data.market_info.change_24h;
-                            document.getElementById('volume').textContent = data.market_info.volume_24h;
                             marketInfo.style.display = 'block';
+                        }
+                        
+                        // 更新市场分析
+                        if (data.analysis) {
+                            document.getElementById('market-trend').textContent = data.analysis.trend;
+                            document.getElementById('macd-signal').textContent = data.analysis.signal_type;
+                            document.getElementById('risk-level').textContent = data.analysis.risk_level;
+                            document.getElementById('trading-suggestion').textContent = data.analysis.suggestion;
+                            document.getElementById('support-level').textContent = data.analysis.support.toFixed(2);
+                            document.getElementById('resistance-level').textContent = data.analysis.resistance.toFixed(2);
+                            document.getElementById('market-analysis').style.display = 'block';
+                            
+                            // 根据建议设置不同的颜色
+                            const suggestion = document.getElementById('trading-suggestion');
+                            suggestion.style.color = getSuggestionColor(data.analysis.suggestion);
                         }
                     } else {
                         // 显示错误
@@ -801,6 +850,24 @@
                 debouncedFetchData();
             }, 500);
         });
+
+        // 添加获取建议颜色的辅助函数
+        function getSuggestionColor(suggestion) {
+            switch(suggestion) {
+                case '强烈买入':
+                case '买入':
+                    return '#00FF00'; // 绿色
+                case '强烈卖出':
+                case '卖出':
+                    return '#FF0000'; // 红色
+                case '谨慎买入':
+                    return '#90EE90'; // 浅绿色
+                case '减仓':
+                    return '#FFA07A'; // 浅红色
+                default:
+                    return '#FFFF00'; // 黄色（观望）
+            }
+        }
     </script>
 </body>
 </html>
