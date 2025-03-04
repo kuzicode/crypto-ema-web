@@ -1,26 +1,7 @@
 # Crypto EMA Web App
 
-这是一个加密货币技术分析工具，显示移动平均线(EMA)和MACD指标的网页应用程序。该应用采用像素风格的加密货币主题UI。
+一个加密货币技术分析工具，显示移动平均线(EMA)和MACD指标。
 
-## 特点
-
-- 网页服务器形式，而不是传统窗口应用
-- 像素风加密货币主题的用户界面
-- 支持通过输入加密货币代码(例如BTC)来查询
-- 快速按钮选择常用加密货币
-- 显示移动平均线和MACD指标
-- 自定义时间间隔和数据点数量
-- 适应性强的响应式设计
-
-## 目录结构
-
-```
-crypto-ema-web/
-├── app.py          # Flask主应用程序
-├── requirements.txt # 依赖项列表
-└── templates/      # HTML模板
-    └── index.html  # 主页模板
-```
 
 ## 安装步骤
 
@@ -42,10 +23,10 @@ source .venv/bin/activate  # Linux/Mac
 - 创建以下`requirements.txt`文件：
 
 ```
-flask==2.0.1
-pandas==1.3.3
-matplotlib==3.4.3
-requests==2.28.1
+flask
+pandas
+matplotlib
+requests
 ```
 
 3. 安装依赖项:
@@ -81,17 +62,13 @@ http://localhost:6969
 5. 点击"GENERATE CHART"按钮生成图表
 6. 图表将显示选定加密货币的移动平均线和MACD指标
 
-## 自定义
-
-- 在`app.py`中修改`TradingBot`类以添加或修改技术指标
-- 在`index.html`中编辑CSS样式以自定义UI外观
 
 ## 依赖项
 
 - Flask: Web框架
 - Pandas: 数据处理
 - Matplotlib: 图表生成
-- python-binance: Binance API客户端
+- Request: 访问 Binance API
 
 ## 注意事项
 
