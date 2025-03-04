@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 添加 favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>Crypto EMA Analyzer | 加密货币EMA分析器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #000033;
+            --text-color: #00FF00;
+            --accent-color: #00FFFF;
+            --accent2-color: #FF00FF;
+            --grid-color: #4B0082;
+            --card-bg: #000044;
+            --button-bg: #003366;
+            --button-hover: #0066CC;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 10px;
+            font-size: 14px;
+            background-image: 
+                linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            max-width: 100%;
+            height: calc(100vh - 20px);
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 头部样式 */
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            text-shadow: 0 0 10px var(--accent-color);
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: var(--text-color);
+            font-size: 12px;
+        }
+        
+        /* 语言切换按钮 */
+        .language-switch {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 100;
+        }
+        
+        .language-btn {
+            background-color: var(--button-bg);
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+        }
+        
+        .language-btn:hover {
+            background-color: var(--button-hover);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+        
+        .language-btn i {
+            margin-right: 5px;
+        }
+        
+        /* 主内容区布局 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            gap: 10px;
+            overflow: hidden;
+        }
+        
+        /* 图表区域 */
+        .chart-section {
+            flex: 80;
+            min-width: 0;
+            overflow: hidden;
+        }
+        
+        /* 控制区域 */
+        .controls-section {
+            flex: 20;
+            min-width: 250px;
+            max-width: 300px;
+            overflow-y: auto;
+        }
+        
+        /* 控制面板 */
+        .control-panel {
+            background-color: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            border-bottom: 1px dashed var(--text-color);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .panel-title {
+            font-size: 15px;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status {
+            color: var(--accent-color);
+            font-size: 10px;
+            height: 12px;
+            margin-top: 5px;
+        }
+        
+        .error {
+            color: #FF0000;
+        }
+        
+        .panel-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        /* 快速选择按钮 */
+        .quick-symbols {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .pixel-btn {
+            background-color: var(--button-bg);
+            color: var(--accent-color);
+            border: none;
+            padding: 4px 8px;
+            margin-bottom: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            position: relative;
+            clip-path: polygon(
+                0% 0%, 95% 0%, 100% 5%, 100% 100%, 5% 100%, 0% 95%
+            );
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        
+        .pixel-btn:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+        }
+        
+        .pixel-btn.active {
+            background-color: var(--button-hover);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 10px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-color);
+            font-size: 12px;
+        }
+        
+        .form-group input, 
+        .form-group select {
+            width: 100%;
+            padding: 6px 8px;
+            background-color: var(--bg-color);
+            color: var(--accent-color);
+            border: 1px solid var(--text-color);
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        /* 生成按钮 */
+        .generate-btn {
+            background-color: var(--button-bg);
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            padding: 7px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-top: auto;
+        }
+        
+        .generate-btn:hover {
+            background-color: var(--button-hover);
+            box-shadow: 0 0 10px var(--accent-color);
+            transform: translateY(-2px);
+        }
+        
+        /* 图表容器 */
+        .chart-container {
+            background-color: var(--bg-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 15px;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #chart-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        
+        /* 加载动画 */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--accent-color);
+            text-align: center;
+        }
+        
+        .loading .fa-spinner {
+            font-size: 40px;
+            margin-bottom: 10px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 市场信息卡片 */
+        .info-card {
+            background-color: rgba(0, 0, 68, 0.7);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 11px;
+            margin-top: 10px;
+        }
+        
+        .info-card h3 {
+            color: var(--accent-color);
+            font-size: 12px;
+            margin-bottom: 5px;
+            border-bottom: 1px dashed var(--text-color);
+            padding-bottom: 4px;
+        }
+        
+        .info-card .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+        
+        .info-card .data-value {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        
+        #market-info {
+            display: none;
+        }
+        
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 10px;
+            color: var(--grid-color);
+            border-top: 1px solid var(--grid-color);
+            padding-top: 10px;
+        }
+        
+        /* CRT效果 */
+        .crt-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 1000;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+            opacity: 0.15;
+        }
+        
+        /* 语言隐藏 */
+        .en {
+            display: none;
+        }
+        
+        /* 提示框 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            text-align: center;
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 10px;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* 发光动画 */
+        .glow {
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px var(--accent-color), 0 0 10px var(--accent-color);
+            }
+            to {
+                text-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color), 0 0 30px var(--accent-color);
+            }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                overflow: auto;
+                height: auto;
+            }
+            
+            .container {
+                height: auto;
+                overflow: visible;
+            }
+            
+            .main-content {
+                flex-direction: column-reverse;
+                overflow: visible;
+            }
+            
+            .chart-section {
+                flex: initial;
+                min-height: 400px;
+            }
+            
+            .controls-section {
+                flex: initial;
+                max-width: 100%;
+            }
+            
+            .language-switch {
+                position: relative;
+                display: inline-block;
+                top: auto;
+                right: auto;
+                float: right;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="crt-effect"></div>
+    <div class="container">
+        <!-- 标题部分 -->
+        <div class="header">
+            <div class="language-switch">
+                <button class="language-btn tooltip" id="lang-switch">
+                    <i class="fas fa-globe"></i>
+                    <span class="zh">English</span>
+                    <span class="en">中文</span>
+                    <span class="tooltiptext">
+                        <span class="zh">切换语言</span>
+                        <span class="en">Change Language</span>
+                    </span>
+                </button>
+            </div>
+            <h1><i class="fas fa-chart-line"></i>
+                <span class="zh">加密货币EMA分析器</span>
+                <span class="en">CRYPTO EMA ANALYZER</span>
+            </h1>
+            <p>
+                <span class="zh">EMA实时移动平均线和MACD分析</span>
+                <span class="en">Real-time Moving Averages & MACD Analysis</span>
+            </p>
+        </div>
+        
+        <div class="main-content">
+            <!-- 图表区域 -->
+            <div class="chart-section">
+                <div class="chart-container">
+                    <img id="chart-image" style="display: none;">
+                    <div class="loading" id="loading" style="display: none;">
+                        <i class="fas fa-spinner"></i>
+                        <p class="glow">
+                            <span class="zh">加载数据中...</span>
+                            <span class="en">LOADING DATA...</span>
+                        </p>
+                    </div>
+                    <div id="initial-message">
+                        <p>
+                            <span class="zh">选择或搜索加密货币，然后点击生成图表按钮开始</span>
+                            <span class="en">Select or search a cryptocurrency and click Generate Chart to begin</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 控制区域 -->
+            <div class="controls-section">
+                <div class="control-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i class="fas fa-sliders-h"></i>
+                            <span class="zh">控制面板</span>
+                            <span class="en">Dashboard</span>
+                        </div>
+                        <div class="status" id="status"></div>
+                    </div>
+                    
+                    <form id="chart-form" class="panel-content">
+                        <div class="quick-symbols-section">
+                            <div class="quick-symbols">
+                                <button type="button" class="pixel-btn" data-symbol="BTC">BTC</button>
+                                <button type="button" class="pixel-btn" data-symbol="ETH">ETH</button>
+                                <button type="button" class="pixel-btn" data-symbol="SOL">SOL</button>
+                                <button type="button" class="pixel-btn" data-symbol="BNB">BNB</button>
+                                <button type="button" class="pixel-btn" data-symbol="XRP">XRP</button>
+                                <button type="button" class="pixel-btn" data-symbol="DOGE">DOGE</button>
+                                <button type="button" class="pixel-btn" data-symbol="TRUMP">TRUMP</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="symbol"><i class="fas fa-search"></i>
+                                <span class="zh">搜索币种(仅支持已上线币安币种):</span>
+                                <span class="en">SYMBOL:</span>
+                            </label>
+                            <input type="text" id="symbol" name="symbol" placeholder="BTC, ETH, SOL..." required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="interval"><i class="fas fa-clock"></i>
+                                <span class="zh">时间周期:</span>
+                                <span class="en">Interval:</span>
+                            </label>
+                            <select id="interval" name="interval">
+                                <option value="15m">15 Minutes</option>
+                                <option value="1h">1 Hour</option>
+                                <option value="4h" selected>4 Hours</option>
+                                <option value="1d">1 Day</option>
+                                <option value="1w">1 Week</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 市场信息卡片 -->
+                        <div id="market-info" class="info-card">
+                            <h3>
+                                <span class="zh">市场信息</span>
+                                <span class="en">Market Info</span>
+                            </h3>
+                            <div class="data-row">
+                                <span class="data-label">
+                                    <span class="zh">当前价格</span>
+                                    <span class="en">Price</span>
+                                </span>
+                                <span class="data-value" id="current-price">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">
+                                    <span class="zh">24小时变化</span>
+                                    <span class="en">24h</span>
+                                </span>
+                                <span class="data-value" id="price-change">--</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">
+                                    <span class="zh">交易量</span>
+                                    <span class="en">Vol</span>
+                                </span>
+                                <span class="data-value" id="volume">--</span>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" id="generate-btn" class="generate-btn">
+                            <i class="fas fa-rocket"></i>
+                            <span class="zh">生成图表</span>
+                            <span class="en">Generate Chart</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>
+                <span class="zh">加密货币EMA分析器 v1.0.2 | 使用风险自负 | 非投资建议</span>
+                <span class="en">Crypto EMA Analyzer v1.0.2 | Use at your own risk | Not financial advice</span>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 元素引用
+            const form = document.getElementById('chart-form');
+            const chartImage = document.getElementById('chart-image');
+            const loading = document.getElementById('loading');
+            const status = document.getElementById('status');
+            const initialMessage = document.getElementById('initial-message');
+            const quickButtons = document.querySelectorAll('.pixel-btn');
+            const langSwitch = document.getElementById('lang-switch');
+            const generateBtn = document.getElementById('generate-btn');
+            const marketInfo = document.getElementById('market-info');
+            const symbolInput = document.getElementById('symbol');
+            const intervalSelect = document.getElementById('interval');
+            
+            // 存储状态
+            const currentState = {
+                symbol: 'BTC',
+                interval: '4h',
+                language: 'zh',
+                lastFetchTime: 0
+            };
+            
+            // 本地存储key
+            const STORAGE_KEY = 'cryptoAnalyzerPrefs';
+            
+            // 加载用户偏好
+            const loadUserPreferences = () => {
+                try {
+                    const savedPrefs = localStorage.getItem(STORAGE_KEY);
+                    if (savedPrefs) {
+                        const prefs = JSON.parse(savedPrefs);
+                        Object.assign(currentState, prefs);
+                        
+                        // 应用设置
+                        document.documentElement.lang = currentState.language;
+                        updateLanguageDisplay();
+                        symbolInput.value = currentState.symbol;
+                        intervalSelect.value = currentState.interval;
+                        highlightActiveSymbol(currentState.symbol);
+                    }
+                } catch (e) {
+                    console.error('无法加载偏好设置:', e);
+                }
+            };
+            
+            // 保存用户偏好
+            const saveUserPreferences = () => {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(currentState));
+                } catch (e) {
+                    console.error('无法保存偏好设置:', e);
+                }
+            };
+            
+            // 更新语言显示
+            const updateLanguageDisplay = () => {
+                const isEnglish = currentState.language === 'en';
+                document.querySelectorAll('.zh').forEach(el => el.style.display = isEnglish ? 'none' : 'inline');
+                document.querySelectorAll('.en').forEach(el => el.style.display = isEnglish ? 'inline' : 'none');
+            };
+            
+            // 高亮活动币种
+            const highlightActiveSymbol = (symbol) => {
+                quickButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-symbol') === symbol);
+                });
+            };
+            
+            // 防抖函数
+            const debounce = (func, wait) => {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            };
+            
+            // 设置状态消息
+            const setStatus = (message, isError = false) => {
+                status.textContent = message;
+                status.classList.toggle('error', isError);
+            };
+            
+            // 获取图表数据
+            const fetchChartData = () => {
+                // 验证输入
+                const symbolValue = symbolInput.value.trim();
+                if (!symbolValue) {
+                    setStatus(currentState.language === 'en' ? 'Please enter a symbol' : '请输入币种代码', true);
+                    return;
+                }
+                
+                // 节流控制
+                const now = Date.now();
+                if (now - currentState.lastFetchTime < 2000) return;
+                currentState.lastFetchTime = now;
+                
+                // 显示加载状态
+                chartImage.style.display = 'none';
+                initialMessage.style.display = 'none';
+                loading.style.display = 'block';
+                setStatus(currentState.language === 'en' ? 'Fetching data...' : '获取数据中...');
+                
+                // 禁用按钮
+                generateBtn.disabled = true;
+                
+                // 准备表单数据
+                const formData = new FormData();
+                formData.append('symbol', symbolValue);
+                formData.append('interval', intervalSelect.value);
+                
+                // 发送请求
+                fetch('/get_chart', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    loading.style.display = 'none';
+                    generateBtn.disabled = false;
+                    
+                    if (data.success) {
+                        // 显示图表
+                        chartImage.src = 'data:image/png;base64,' + data.image;
+                        chartImage.style.display = 'block';
+                        setStatus(currentState.language === 'en' ? 'Chart generated successfully!' : '图表生成成功！');
+                        
+                        // 更新市场信息
+                        if (data.market_info) {
+                            document.getElementById('current-price').textContent = data.market_info.price;
+                            document.getElementById('price-change').textContent = data.market_info.change_24h;
+                            document.getElementById('volume').textContent = data.market_info.volume_24h;
+                            marketInfo.style.display = 'block';
+                        }
+                    } else {
+                        // 显示错误
+                        chartImage.style.display = 'none';
+                        initialMessage.style.display = 'block';
+                        const errorPrefix = currentState.language === 'en' ? 'Error: ' : '错误：';
+                        setStatus(errorPrefix + data.error, true);
+                        marketInfo.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    // 处理异常
+                    loading.style.display = 'none';
+                    chartImage.style.display = 'none';
+                    initialMessage.style.display = 'block';
+                    generateBtn.disabled = false;
+                    
+                    const errorPrefix = currentState.language === 'en' ? 'Error: ' : '错误：';
+                    setStatus(errorPrefix + error.message, true);
+                    marketInfo.style.display = 'none';
+                });
+            };
+            
+            // 带防抖的查询函数
+            const debouncedFetchData = debounce(fetchChartData, 300);
+            
+            // 事件监听器
+            
+            // 语言切换
+            langSwitch.addEventListener('click', () => {
+                currentState.language = currentState.language === 'zh' ? 'en' : 'zh';
+                document.documentElement.lang = currentState.language;
+                updateLanguageDisplay();
+                saveUserPreferences();
+            });
+            
+            // 快速选择按钮
+            quickButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const symbol = this.getAttribute('data-symbol');
+                    symbolInput.value = symbol;
+                    currentState.symbol = symbol;
+                    highlightActiveSymbol(symbol);
+                    saveUserPreferences();
+                    fetchChartData();
+                });
+            });
+            
+            // 表单提交
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                currentState.symbol = symbolInput.value;
+                currentState.interval = intervalSelect.value;
+                saveUserPreferences();
+                highlightActiveSymbol(currentState.symbol);
+                debouncedFetchData();
+            });
+            
+            // 周期变更
+            intervalSelect.addEventListener('change', function() {
+                currentState.interval = this.value;
+                saveUserPreferences();
+                if (symbolInput.value) {
+                    debouncedFetchData();
+                }
+            });
+            
+            // 键盘快捷键
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && document.activeElement === symbolInput) {
+                    e.preventDefault();
+                    form.dispatchEvent(new Event('submit'));
+                }
+            });
+            
+            // 初始化
+            loadUserPreferences();
+            
+            // 首次加载时自动生成图表
+            setTimeout(() => {
+                if (!symbolInput.value) {
+                    symbolInput.value = currentState.symbol || 'BTC';
+                }
+                highlightActiveSymbol(symbolInput.value);
+                debouncedFetchData();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+# app.py
+from flask import Flask, render_template, request, jsonify
+import pandas as pd
+import matplotlib
+# 设置 matplotlib 使用非交互式后端，避免 NSException 错误
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import datetime
+import base64
+import io
+import os
+import logging
+import requests
+import json
+import time
+from datetime import datetime as dt
+
+app = Flask(__name__)
+app.logger.setLevel(logging.INFO)
+
+# REST API:  Use Binance REST API K-line data 
+def get_klines(symbol, interval, limit=1000):
+    url = f"https://api.binance.com/api/v3/klines"
+    params = {
+        'symbol': symbol,
+        'interval': interval,
+        'limit': limit
+    }
+    
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        app.logger.error(f"Failed to retrieve K-line data: {response.text}")
+        return []
+
+# 辅助函数
+def get_alltime(time):
+    formatted_time = datetime.datetime.fromtimestamp(float(time / 1000))
+    return formatted_time.strftime('%Y-%m-%d %H:%M:%S')
+
+def parser_klines(klines):
+    return {
+        "Open_time": klines[0],
+        "Open": klines[1],
+        "High": klines[2],
+        "Low": klines[3],
+        "Close": klines[4],
+        "Volume": klines[5],
+        "Close_time": klines[6],
+        "Quote_asset_volume": klines[7],
+        "Number_of_trades": klines[8],
+        "Taker_buy_base_asset_volume": klines[9],
+        "Taker_buy_quote_asset_volume": klines[10],
+        "Ignore": klines[11]
+    }
+
+class TradingBot:
+    def __init__(self, symbol, interval="4h", limit=1000):
+        self.symbol = symbol
+        self.interval = interval
+        self.limit = limit  # 固定为1000，以获取足够的数据点
+        self.data = self.fetch_data()
+        if not self.data.empty:
+            self.calculate_macd()
+            self.indicators = self.calculate_indicators()
+        else:
+            self.indicators = pd.DataFrame()
+
+    def fetch_data(self):
+        try:
+            app.logger.info(f"正在获取 {self.symbol} 的数据...")
+            
+            # Get Data
+            klines = get_klines(self.symbol, self.interval, self.limit)
+            
+            if not klines:
+                app.logger.error(f"获取 {self.symbol} 的K线数据失败")
+                return pd.DataFrame()
+                
+            data = {
+                "Open": [], "High": [], "Low": [], "Close": [],
+                "Time": [], "Volume": [], "Open_time": [], "Close_time": []
+            }
+
+            for kline in klines:
+                parsed_kline = parser_klines(kline)
+                data["Open"].append(float(parsed_kline["Open"]))
+                data["High"].append(float(parsed_kline["High"]))
+                data["Low"].append(float(parsed_kline["Low"]))
+                data["Close"].append(float(parsed_kline["Close"]))
+                data["Time"].append(float(parsed_kline["Close_time"]) / 1000)
+                data["Open_time"].append(get_alltime(parsed_kline["Open_time"]))
+                data["Close_time"].append(get_alltime(parsed_kline["Close_time"]))
+                data["Volume"].append(float(parsed_kline["Volume"]))
+
+            # 转换时间戳到pandas datetime
+            timestamp = pd.to_datetime(data["Time"], unit='s')
+            
+            # 创建DataFrame并设置索引
+            new_data = pd.DataFrame(data, columns=['Open', 'High', 'Low', 'Close', 'Volume', 'Time', 'Open_time', 'Close_time'])
+            
+            # 尝试将时间戳设置为索引，同时处理时区
+            try:
+                utc_timestamp = timestamp.tz_localize('UTC')
+                utc_plus_8_timestamp = utc_timestamp.tz_convert('Asia/Shanghai')
+                new_data.index = utc_plus_8_timestamp
+            except:
+                # 如果时区转换失败，使用原始时间戳作为索引
+                new_data.index = timestamp
+
+            return new_data
+        except Exception as e:
+            app.logger.error(f"Get {self.symbol} data error: {e}")
+            return pd.DataFrame()
+
+    def calculate_indicators(self):
+        try:
+            df = self.data
+            df['MA1'] = df['Close']
+            df['MA30'] = df['Close'].rolling(window=30).mean()
+            df['MA72'] = df['Close'].rolling(window=72).mean()
+            df['MA2'] = (df['MA30'] + df['MA72']) / 2
+            df['MA3'] = df['MA2'] * 1.1
+            df['MA4'] = df['MA2'] * 1.2
+            df['MA5'] = df['MA2'] * 0.9
+            df['MA6'] = df['MA2'] * 0.8
+            return df
+        except Exception as e:
+            app.logger.error(f"计算 {self.symbol} 指标时出错: {e}")
+            return pd.DataFrame()
+
+    def calculate_macd(self, short_window=12, long_window=26, signal_window=9):
+        try:
+            # 计算短期和长期的EMA
+            self.data['EMA12'] = self.data['Close'].ewm(span=short_window, adjust=False).mean()
+            self.data['EMA26'] = self.data['Close'].ewm(span=long_window, adjust=False).mean()
+
+            # 计算MACD线
+            self.data['MACD'] = self.data['EMA12'] - self.data['EMA26']
+
+            # 计算信号线
+            self.data['Signal Line'] = self.data['MACD'].ewm(span=signal_window, adjust=False).mean()
+
+            # 计算MACD柱
+            self.data['MACD Histogram'] = self.data['MACD'] - self.data['Signal Line']
+
+            return self.data
+        except Exception as e:
+            app.logger.error(f"计算 {self.symbol} MACD时出错: {e}")
+            return self.data
+
+    def generate_plot(self):
+        try:
+            if self.indicators.empty:
+                return None, f"No data available for {self.symbol}. Please check if this symbol exists on Binance."
+                
+            df = self.indicators
+            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(13, 8), gridspec_kw={'height_ratios': [3, 1]})
+            plt.style.use('dark_background')  # 使用暗色主题，更符合加密货币风格
+
+            # 绘制MA1到MA6
+            ax1.plot(df['MA1'], label='Current Price', color='#00FFFF', linewidth=2)  # 青色
+            ax1.plot(df['MA2'], label='MA2', color='#808080')
+            ax1.plot(df['MA3'], label='MA3', color='#32CD32')
+            ax1.plot(df['MA4'], label='MA4', color='#FFFF00')
+            ax1.plot(df['MA5'], label='MA5', color='#32CD32', linestyle='--')
+            ax1.plot(df['MA6'], label='MA6', color='#4169E1', linestyle='--')
+
+            # 设置日期格式和刻度
+            # 调整为每50个点取一个刻度，避免过多刻度导致的显示问题
+            ax1.set_xticks(df.index[::50])  
+            ax1.tick_params(axis='x', rotation=45)
+            ax1.tick_params(colors='#00FF00')  # 绿色坐标轴文字
+            
+            # 尝试使用日期格式化器，如果索引是日期时间类型
+            try:
+                ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+            except:
+                pass
+                
+            ax1.xaxis.set_visible(False)
+
+            ax1.set_title(f'{self.symbol} Moving Averages', color='#00FF00', fontsize=16)
+            ax1.set_ylabel('Price', color='#00FF00')
+            ax1.legend()
+            
+            # 像素风格化：网格和背景
+            ax1.grid(True, linestyle='--', alpha=0.3, color='#4B0082')
+            ax1.set_facecolor('#000033')  # 深蓝背景
+            
+            # 添加当前价格标注
+            current_price = df['Close'].iloc[-1]
+            ax1.text(df.index[-1], current_price, f"  {current_price:.2f}", 
+                    color='#00FFFF', fontweight='bold', verticalalignment='center')
+            
+            # 绘制MACD和信号线
+            ax2.plot(df.index, df['MACD'], label='MACD', color='#00FFFF', linewidth=1.5)
+            ax2.plot(df.index, df['Signal Line'], label='Signal', color='#FF00FF', linewidth=1.5)
+
+            # 绘制MACD柱状图
+            colors = ['#00FF00' if val >= 0 else '#FF0000' for val in df['MACD Histogram']]
+            ax2.bar(df.index, df['MACD Histogram'], color=colors, width=0.7, alpha=0.7)
+
+            # 设置日期格式和刻度
+            ax2.set_xticks(df.index[::50])
+            ax2.tick_params(axis='x', rotation=45, colors='#00FF00')
+            
+            # 尝试使用日期格式化器，如果索引是日期时间类型
+            try:
+                ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+            except:
+                pass
+                
+            ax2.set_xlabel('Date', color='#00FF00')
+            ax2.set_ylabel('MACD', color='#00FF00')
+            ax2.legend(facecolor='#000033', edgecolor='#32CD32')
+            ax2.grid(True, linestyle='--', alpha=0.3, color='#4B0082')
+            ax2.set_facecolor('#000033')
+
+            fig.patch.set_facecolor('#000033')
+            plt.tight_layout()
+            
+            # 转换为base64编码的图像
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png', facecolor='#000033', dpi=100)
+            buf.seek(0)
+            img_str = base64.b64encode(buf.read()).decode('utf-8')
+            plt.close(fig)
+            
+            return img_str, None
+        except Exception as e:
+            app.logger.error(f"生成{self.symbol}图表时出错: {e}")
+            return None, str(e)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/get_chart', methods=['POST'])
+def get_chart():
+    try:
+        symbol = request.form.get('symbol', 'BTC').upper().strip()
+        if not symbol.endswith('USDT'):
+            symbol = symbol + 'USDT'
+        
+        interval = request.form.get('interval', '4h')
+        limit = 1000  # 固定为1000，不再从前端接收
+        
+        bot = TradingBot(symbol=symbol, interval=interval, limit=limit)
+        img_str, error = bot.generate_plot()
+        
+        if error:
+            return jsonify({'success': False, 'error': error})
+        
+        return jsonify({'success': True, 'image': img_str})
+    except Exception as e:
+        app.logger.error(f"处理请求时出错: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=6969)
