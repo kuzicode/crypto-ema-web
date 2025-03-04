@@ -1,8 +1,6 @@
-# app.py
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import matplotlib
-# 设置 matplotlib 使用非交互式后端，避免 NSException 错误
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -19,7 +17,7 @@ from datetime import datetime as dt
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
 
-# REST API:  Use Binance REST API K-line data 
+# REST API: Binance API K-line data 
 def get_klines(symbol, interval, limit=1000):
     url = f"https://api.binance.com/api/v3/klines"
     params = {
