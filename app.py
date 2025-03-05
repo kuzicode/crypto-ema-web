@@ -163,6 +163,7 @@ class TradingBot:
             # 获取最近的数据点
             latest = df.iloc[-1]
             prev = df.iloc[-2]
+            prev5 = df.iloc[-5] if len(df) >= 5 else prev
             
             # 市场分析
             analysis = {
@@ -178,7 +179,7 @@ class TradingBot:
                 "trend": "",
                 "signal_type": "",
                 "risk_level": "",
-                "suggestion": ""
+                "trading_advice": ""  # 新增操作建议字段
             }
             
             # 趋势判断
@@ -216,24 +217,6 @@ class TradingBot:
             else:
                 analysis["risk_level"] = "低"
             
-            # 买入建议
-            if analysis["trend"] == "强势上升" and analysis["signal_type"] == "金叉后动能增强":
-                analysis["suggestion"] = "强烈买入"
-            elif analysis["trend"] == "上升" and analysis["signal_type"] == "金叉":
-                analysis["suggestion"] = "买入"
-            elif analysis["trend"] == "下降" and analysis["signal_type"] == "死叉":
-                analysis["suggestion"] = "卖出"
-            elif analysis["trend"] == "强势下降" and analysis["signal_type"] == "死叉后动能增强":
-                analysis["suggestion"] = "强烈卖出"
-            elif analysis["trend"] == "横盘整理":
-                analysis["suggestion"] = "观望"
-            elif analysis["trend"] == "上升" and analysis["signal_type"] == "死叉":
-                analysis["suggestion"] = "减仓"
-            elif analysis["trend"] == "下降" and analysis["signal_type"] == "金叉":
-                analysis["suggestion"] = "谨慎买入"
-            else:
-                analysis["suggestion"] = "观望"
-                
             # 添加支撑和阻力位
             last_50 = df.iloc[-50:]
             support = last_50["Low"].min()
@@ -242,6 +225,51 @@ class TradingBot:
             analysis["support"] = support
             analysis["resistance"] = resistance
             
+            # 新增：技术分析综合评估
+            # 1. 价格动量
+            price_momentum = (latest["Close"] - prev5["Close"]) / prev5["Close"] * 100
+            
+            # 2. MACD趋势强度
+            macd_strength = abs(latest["MACD"]) / latest["Close"] * 100
+            
+            # 3. 价格与MA的距离
+            ma_distance = (latest["Close"] - latest["MA2"]) / latest["MA2"] * 100
+            
+            # 4. 价格是否接近支撑/阻力位
+            near_support = (latest["Close"] - support) / support * 100 < 3
+            near_resistance = (resistance - latest["Close"]) / latest["Close"] * 100 < 3
+            
+            # 5. 柱状图反转信号
+            histogram_reversal = (latest["MACD Histogram"] * prev["MACD Histogram"] < 0)
+            
+            # 综合分析生成操作建议
+            if analysis["trend"] == "强势上升" and analysis["signal_type"] == "金叉后动能增强":
+                if near_resistance:
+                    analysis["trading_advice"] = "接近阻力位，谨慎追高"
+                else:
+                    analysis["trading_advice"] = "强势上涨趋势，可考虑买入"
+            elif analysis["trend"] == "上升" and analysis["signal_type"] == "金叉":
+                analysis["trading_advice"] = "上升趋势形成，可分批买入"
+            elif analysis["trend"] == "下降" and analysis["signal_type"] == "死叉":
+                if near_support:
+                    analysis["trading_advice"] = "接近支撑位，可能反弹"
+                else:
+                    analysis["trading_advice"] = "下跌趋势，建议观望或减仓"
+            elif analysis["trend"] == "强势下降" and analysis["signal_type"] == "死叉后动能增强":
+                analysis["trading_advice"] = "强势下跌，建议观望"
+            elif histogram_reversal and latest["MACD Histogram"] > 0:
+                analysis["trading_advice"] = "MACD柱状图转正，可能是买入信号"
+            elif histogram_reversal and latest["MACD Histogram"] < 0:
+                analysis["trading_advice"] = "MACD柱状图转负，可能是卖出信号"
+            elif near_support and analysis["risk_level"] != "高":
+                analysis["trading_advice"] = "接近支撑位，可考虑小仓位试探"
+            elif near_resistance:
+                analysis["trading_advice"] = "接近阻力位，注意可能回调"
+            elif abs(ma_distance) < 0.5:
+                analysis["trading_advice"] = "价格接近均线，等待方向确认"
+            else:
+                analysis["trading_advice"] = "市场信号不明确，建议观望"
+                
             return analysis
             
         except Exception as e:
