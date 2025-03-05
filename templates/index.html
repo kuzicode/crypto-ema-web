@@ -6,7 +6,7 @@
     <!-- 添加 favicon -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <title>Crypto EMA Analyzer | 加密货币EMA分析器</title>
+    <title>Crypto Indicator Analyzer | 加密货币指标分析器</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         :root {
@@ -453,8 +453,8 @@
                 </button>
             </div>
             <h1><i class="fas fa-chart-line"></i>
-                <span class="zh">加密货币EMA分析器</span>
-                <span class="en">CRYPTO EMA ANALYZER</span>
+                <span class="zh">加密货币指标分析器</span>
+                <span class="en">Crypto Indicator Analyzer</span>
             </h1>
             <p>
                 <span class="zh">EMA实时移动平均线和MACD分析</span>
@@ -571,13 +571,6 @@
                                     <span class="en">Risk Level</span>
                                 </span>
                                 <span class="data-value" id="risk-level">--</span>
-                            </div>
-                            <div class="data-row">
-                                <span class="data-label">
-                                    <span class="zh">建议操作</span>
-                                    <span class="en">Suggestion</span>
-                                </span>
-                                <span class="data-value glow" id="trading-suggestion">--</span>
                             </div>
                             <div class="data-row">
                                 <span class="data-label">
@@ -755,14 +748,9 @@
                             document.getElementById('market-trend').textContent = data.analysis.trend;
                             document.getElementById('macd-signal').textContent = data.analysis.signal_type;
                             document.getElementById('risk-level').textContent = data.analysis.risk_level;
-                            document.getElementById('trading-suggestion').textContent = data.analysis.suggestion;
                             document.getElementById('support-level').textContent = data.analysis.support.toFixed(2);
                             document.getElementById('resistance-level').textContent = data.analysis.resistance.toFixed(2);
                             document.getElementById('market-analysis').style.display = 'block';
-                            
-                            // 根据建议设置不同的颜色
-                            const suggestion = document.getElementById('trading-suggestion');
-                            suggestion.style.color = getSuggestionColor(data.analysis.suggestion);
                         }
                     } else {
                         // 显示错误
@@ -850,24 +838,6 @@
                 debouncedFetchData();
             }, 500);
         });
-
-        // 添加获取建议颜色的辅助函数
-        function getSuggestionColor(suggestion) {
-            switch(suggestion) {
-                case '强烈买入':
-                case '买入':
-                    return '#00FF00'; // 绿色
-                case '强烈卖出':
-                case '卖出':
-                    return '#FF0000'; // 红色
-                case '谨慎买入':
-                    return '#90EE90'; // 浅绿色
-                case '减仓':
-                    return '#FFA07A'; // 浅红色
-                default:
-                    return '#FFFF00'; // 黄色（观望）
-            }
-        }
     </script>
 </body>
 </html>

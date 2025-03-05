@@ -17,9 +17,9 @@ from datetime import datetime as dt
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
 
-# REST API: Binance API K-line data 
+# REST API: 币安 API K-line数据 
 def get_klines(symbol, interval, limit=1000):
-    url = f"https://api.binance.com/api/v3/klines"
+    url = "https://api.binance.com/api/v3/klines"
     params = {
         'symbol': symbol,
         'interval': interval,
@@ -33,26 +33,31 @@ def get_klines(symbol, interval, limit=1000):
         app.logger.error(f"Failed to retrieve K-line data: {response.text}")
         return []
 
-# 辅助函数
-def get_alltime(time):
-    formatted_time = datetime.datetime.fromtimestamp(float(time / 1000))
-    return formatted_time.strftime('%Y-%m-%d %H:%M:%S')
-
-def parser_klines(klines):
+# 辅助函数 - 解析币安K线数据的格式
+def parser_klines(kline):
     return {
-        "Open_time": klines[0],
-        "Open": klines[1],
-        "High": klines[2],
-        "Low": klines[3],
-        "Close": klines[4],
-        "Volume": klines[5],
-        "Close_time": klines[6],
-        "Quote_asset_volume": klines[7],
-        "Number_of_trades": klines[8],
-        "Taker_buy_base_asset_volume": klines[9],
-        "Taker_buy_quote_asset_volume": klines[10],
-        "Ignore": klines[11]
+        "Open_time": kline[0],
+        "Open": kline[1],
+        "High": kline[2],
+        "Low": kline[3],
+        "Close": kline[4],
+        "Volume": kline[5],
+        "Close_time": kline[6],
+        "Quote_asset_volume": kline[7],
+        "Number_of_trades": kline[8],
+        "Taker_buy_base_asset_volume": kline[9],
+        "Taker_buy_quote_asset_volume": kline[10],
+        "Ignore": kline[11]
     }
+
+# 时间格式化函数
+def get_alltime(time):
+    try:
+        formatted_time = datetime.datetime.fromtimestamp(time / 1000)
+        return formatted_time.strftime('%Y-%m-%d %H:%M:%S')
+    except Exception as e:
+        app.logger.error(f"时间格式化错误: {e}")
+        return str(time)
 
 class TradingBot:
     def __init__(self, symbol, interval="4h"):
@@ -83,15 +88,14 @@ class TradingBot:
             }
 
             for kline in klines:
-                parsed_kline = parser_klines(kline)
-                data["Open"].append(float(parsed_kline["Open"]))
-                data["High"].append(float(parsed_kline["High"]))
-                data["Low"].append(float(parsed_kline["Low"]))
-                data["Close"].append(float(parsed_kline["Close"]))
-                data["Time"].append(float(parsed_kline["Close_time"]) / 1000)
-                data["Open_time"].append(get_alltime(parsed_kline["Open_time"]))
-                data["Close_time"].append(get_alltime(parsed_kline["Close_time"]))
-                data["Volume"].append(float(parsed_kline["Volume"]))
+                data["Open_time"].append(get_alltime(kline[0]))
+                data["Close_time"].append(get_alltime(kline[6]))
+                data["Open"].append(float(kline[1]))
+                data["High"].append(float(kline[2]))
+                data["Low"].append(float(kline[3]))
+                data["Close"].append(float(kline[4]))
+                data["Volume"].append(float(kline[5]))
+                data["Time"].append(float(kline[0]) / 1000)
 
             # 转换时间戳到pandas datetime
             timestamp = pd.to_datetime(data["Time"], unit='s')
@@ -247,7 +251,7 @@ class TradingBot:
     def generate_plot(self):
         try:
             if self.indicators.empty:
-                return None, f"No data available for {self.symbol}. Please check if this symbol exists on Binance."
+                return None, f"No data available for {self.symbol}. Please check if this symbol exists on OKX."
                 
             df = self.indicators
             fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(13, 8), gridspec_kw={'height_ratios': [3, 1]})
@@ -340,7 +344,7 @@ def get_chart():
         
         interval = request.form.get('interval', '4h')
         
-        bot = TradingBot(symbol=symbol, interval=interval)  # 不再传入limit参数
+        bot = TradingBot(symbol=symbol, interval=interval)
         img_str, error = bot.generate_plot()
         
         if error:
