@@ -55,10 +55,10 @@ def parser_klines(klines):
     }
 
 class TradingBot:
-    def __init__(self, symbol, interval="4h", limit=1000):
+    def __init__(self, symbol, interval="4h"):
         self.symbol = symbol
         self.interval = interval
-        self.limit = limit  # 固定为1000，以获取足够的数据点
+        self.limit = 5000  # 固定为5000，以获取更多的数据点
         self.data = self.fetch_data()
         if not self.data.empty:
             self.calculate_macd()
@@ -339,9 +339,8 @@ def get_chart():
             symbol = symbol + 'USDT'
         
         interval = request.form.get('interval', '4h')
-        limit = 1000  # 固定为1000，不再从前端接收
         
-        bot = TradingBot(symbol=symbol, interval=interval, limit=limit)
+        bot = TradingBot(symbol=symbol, interval=interval)  # 不再传入limit参数
         img_str, error = bot.generate_plot()
         
         if error:
@@ -352,9 +351,7 @@ def get_chart():
         
         # 获取当前最新价格
         market_info = {
-            "price": f"{bot.indicators['Close'].iloc[-1]:.2f} USDT",
-            "change_24h": "计算中...",  # 这里需要另外计算24小时变化
-            "volume_24h": f"{bot.indicators['Volume'].iloc[-1]:.2f}"
+            "price": f"{bot.indicators['Close'].iloc[-1]:.2f} USDT"
         }
         
         return jsonify({
