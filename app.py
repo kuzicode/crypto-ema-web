@@ -154,7 +154,7 @@ class TradingBot:
             return self.data
             
     def generate_market_analysis(self):
-        """生成市场分析和买入建议"""
+        """生成市场分析和买入建议（仅中文）"""
         try:
             if self.indicators.empty:
                 return None
@@ -179,7 +179,7 @@ class TradingBot:
                 "trend": "",
                 "signal_type": "",
                 "risk_level": "",
-                "trading_advice": ""  # 新增操作建议字段
+                "trading_advice": ""  # 操作建议
             }
             
             # 趋势判断
@@ -225,7 +225,7 @@ class TradingBot:
             analysis["support"] = support
             analysis["resistance"] = resistance
             
-            # 新增：技术分析综合评估
+            # 技术分析综合评估
             # 1. 价格动量
             price_momentum = (latest["Close"] - prev5["Close"]) / prev5["Close"] * 100
             
@@ -269,7 +269,7 @@ class TradingBot:
                 analysis["trading_advice"] = "价格接近均线，等待方向确认"
             else:
                 analysis["trading_advice"] = "市场信号不明确，建议观望"
-                
+            
             return analysis
             
         except Exception as e:

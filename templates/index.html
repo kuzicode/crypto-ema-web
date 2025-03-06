@@ -760,25 +760,46 @@
                         
                         // 更新市场分析
                         if (data.analysis) {
-                            document.getElementById('market-trend').textContent = data.analysis.trend;
-                            document.getElementById('macd-signal').textContent = data.analysis.signal_type;
-                            document.getElementById('risk-level').textContent = data.analysis.risk_level;
+                            // 获取当前语言
+                            const lang = currentState.language;
+                            
+                            // 根据当前语言显示相应的分析结果
+                            const trend = lang === 'zh' ? data.analysis.trend : translate(data.analysis.trend, 'en');
+                            const signal = lang === 'zh' ? data.analysis.signal_type : translate(data.analysis.signal_type, 'en');
+                            const risk = lang === 'zh' ? data.analysis.risk_level : translate(data.analysis.risk_level, 'en');
+                            const advice = lang === 'zh' ? data.analysis.trading_advice : translate(data.analysis.trading_advice, 'en');
+                            
+                            document.getElementById('market-trend').textContent = trend;
+                            document.getElementById('macd-signal').textContent = signal;
+                            document.getElementById('risk-level').textContent = risk;
                             document.getElementById('support-level').textContent = data.analysis.support.toFixed(2);
                             document.getElementById('resistance-level').textContent = data.analysis.resistance.toFixed(2);
                             
                             // 添加操作建议
                             const adviceElement = document.getElementById('trading-advice');
-                            adviceElement.textContent = data.analysis.trading_advice;
+                            adviceElement.textContent = advice;
                             
                             // 根据建议内容设置颜色
-                            if (data.analysis.trading_advice.includes('买入') || data.analysis.trading_advice.includes('上涨')) {
-                                adviceElement.style.color = '#00FF00'; // 绿色
-                            } else if (data.analysis.trading_advice.includes('卖出') || data.analysis.trading_advice.includes('下跌')) {
-                                adviceElement.style.color = '#FF4500'; // 红色
-                            } else if (data.analysis.trading_advice.includes('观望')) {
-                                adviceElement.style.color = '#FFFF00'; // 黄色
-                            } else if (data.analysis.trading_advice.includes('谨慎')) {
-                                adviceElement.style.color = '#FFA500'; // 橙色
+                            if (lang === 'zh') {
+                                if (advice.includes('买入') || advice.includes('上涨')) {
+                                    adviceElement.style.color = '#00FF00'; // 绿色
+                                } else if (advice.includes('卖出') || advice.includes('下跌')) {
+                                    adviceElement.style.color = '#FF4500'; // 红色
+                                } else if (advice.includes('观望')) {
+                                    adviceElement.style.color = '#FFFF00'; // 黄色
+                                } else if (advice.includes('谨慎')) {
+                                    adviceElement.style.color = '#FFA500'; // 橙色
+                                }
+                            } else {
+                                if (advice.includes('buy') || advice.includes('uptrend')) {
+                                    adviceElement.style.color = '#00FF00'; // 绿色
+                                } else if (advice.includes('sell') || advice.includes('downtrend')) {
+                                    adviceElement.style.color = '#FF4500'; // 红色
+                                } else if (advice.includes('wait')) {
+                                    adviceElement.style.color = '#FFFF00'; // 黄色
+                                } else if (advice.includes('cautious')) {
+                                    adviceElement.style.color = '#FFA500'; // 橙色
+                                }
                             }
                             
                             document.getElementById('market-analysis').style.display = 'block';
@@ -869,6 +890,47 @@
                 debouncedFetchData();
             }, 500);
         });
+
+        // 添加翻译映射
+        const translations = {
+            // 趋势翻译
+            "强势上升": "Strong Uptrend",
+            "上升": "Uptrend",
+            "强势下降": "Strong Downtrend",
+            "下降": "Downtrend",
+            "横盘整理": "Consolidation",
+            
+            // MACD信号翻译
+            "金叉后动能增强": "Golden Cross with Increasing Momentum",
+            "金叉": "Golden Cross",
+            "死叉后动能增强": "Death Cross with Increasing Momentum",
+            "死叉": "Death Cross",
+            
+            // 风险等级翻译
+            "高": "High",
+            "中": "Medium",
+            "低": "Low",
+            
+            // 操作建议翻译
+            "接近阻力位，谨慎追高": "Near resistance, be cautious",
+            "强势上涨趋势，可考虑买入": "Strong uptrend, consider buying",
+            "上升趋势形成，可分批买入": "Uptrend forming, consider gradual buying",
+            "接近支撑位，可能反弹": "Near support, possible rebound",
+            "下跌趋势，建议观望或减仓": "Downtrend, wait or reduce position",
+            "强势下跌，建议观望": "Strong downtrend, wait for reversal",
+            "MACD柱状图转正，可能是买入信号": "MACD histogram turned positive, potential buy signal",
+            "MACD柱状图转负，可能是卖出信号": "MACD histogram turned negative, potential sell signal",
+            "接近支撑位，可考虑小仓位试探": "Near support, consider small position",
+            "接近阻力位，注意可能回调": "Near resistance, watch for pullback",
+            "价格接近均线，等待方向确认": "Price near MA, wait for direction",
+            "市场信号不明确，建议观望": "Unclear market signals, wait and see"
+        };
+
+        // 翻译函数
+        function translate(text, toLang) {
+            if (toLang === 'zh') return text;
+            return translations[text] || text;
+        }
     </script>
 </body>
 </html>

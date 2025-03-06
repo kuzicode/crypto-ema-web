@@ -10,7 +10,7 @@
 ```bash
 mkdir -p crypto-ema-web/templates
 cd crypto-ema-web
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate  # Linux/Mac
 # Or on Windows:
 # .venv\Scripts\activate
