@@ -70,37 +70,6 @@
             font-size: 12px;
         }
         
-        /* 语言切换按钮 */
-        .language-switch {
-            position: absolute;
-            top: 0;
-            right: 0;
-            z-index: 100;
-        }
-        
-        .language-btn {
-            background-color: var(--button-bg);
-            color: var(--accent-color);
-            border: 2px solid var(--accent-color);
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 12px;
-            border-radius: 4px;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-        }
-        
-        .language-btn:hover {
-            background-color: var(--button-hover);
-            box-shadow: 0 0 10px var(--accent-color);
-        }
-        
-        .language-btn i {
-            margin-right: 5px;
-        }
-        
         /* 主内容区布局 */
         .main-content {
             display: flex;
@@ -120,8 +89,9 @@
         .controls-section {
             flex: 20;
             min-width: 250px;
-            max-width: 300px;
+            max-width: 350px;
             overflow-y: auto;
+            overflow-x: hidden;
         }
         
         /* 控制面板 */
@@ -134,6 +104,8 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .panel-header {
@@ -152,9 +124,16 @@
         
         .status {
             color: var(--accent-color);
-            font-size: 10px;
-            height: 12px;
+            font-size: 12px;
+            height: 15px;
             margin-top: 5px;
+            font-weight: 500;
+        }
+        
+        .status-container {
+            text-align: center;
+            margin: 15px 0 10px 0;
+            min-height: 15px;
         }
         
         .error {
@@ -173,7 +152,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
-            margin-bottom: 5px;
+            margin-top: 5px;
         }
         
         .pixel-btn {
@@ -203,7 +182,7 @@
         
         /* 表单样式 */
         .form-group {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         
         .form-group label {
@@ -298,15 +277,17 @@
             border-radius: 4px;
             padding: 8px;
             font-size: 11px;
-            margin-top: 10px;
         }
         
         .info-card h3 {
             color: var(--accent-color);
-            font-size: 12px;
+            font-size: 14px;
             margin-bottom: 5px;
             border-bottom: 1px dashed var(--text-color);
             padding-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .info-card .data-row {
@@ -347,11 +328,6 @@
             pointer-events: none;
             mix-blend-mode: overlay;
             opacity: 0.15;
-        }
-        
-        /* 语言隐藏 */
-        .en {
-            display: none;
         }
         
         /* 提示框 */
@@ -424,15 +400,6 @@
                 flex: initial;
                 max-width: 100%;
             }
-            
-            .language-switch {
-                position: relative;
-                display: inline-block;
-                top: auto;
-                right: auto;
-                float: right;
-                margin-bottom: 10px;
-            }
         }
         
         /* 添加操作建议的样式 */
@@ -441,6 +408,116 @@
             color: #FFFF00; /* 默认黄色 */
             text-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
         }
+        
+        /* 添加盘面趋势样式 */
+        .market-trends-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            padding: 8px;
+            margin: 10px 0;
+        }
+        
+        .market-trends {
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        
+        .trend-category {
+            margin-bottom: 4px;
+        }
+        
+        .trend-title {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        .trend-symbols {
+            color: var(--text-color);
+        }
+        
+        .trend-count {
+            color: #FFFF00;
+        }
+        
+        .trend-yellow {
+            color: #FFFF00;
+        }
+        
+        .trend-green {
+            color: #32CD32;
+        }
+        
+        .trend-neutral {
+            color: #00FFFF;
+        }
+        
+        .trend-green-down {
+            color: #32CD32;
+        }
+        
+        .trend-blue {
+            color: #4169E1;
+        }
+        
+        .loading-trends {
+            font-style: italic;
+            color: var(--accent-color);
+            text-align: center;
+        }
+        
+        /* 添加刷新按钮样式 */
+        .trends-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .trends-header h3 {
+            font-size: 14px;
+            color: var(--accent-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .refresh-btn {
+            background-color: var(--button-bg);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            background-color: var(--button-hover);
+            box-shadow: 0 0 5px var(--accent-color);
+        }
+        
+        .refresh-btn i {
+            font-size: 10px;
+        }
+        
+        .trend-message {
+            text-align: center;
+            color: var(--text-color);
+            font-style: italic;
+            font-size: 10px;
+        }
+        
+        /* 加载中动画 */
+        .refresh-btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -448,24 +525,11 @@
     <div class="container">
         <!-- 标题部分 -->
         <div class="header">
-            <div class="language-switch">
-                <button class="language-btn tooltip" id="lang-switch">
-                    <i class="fas fa-globe"></i>
-                    <span class="zh">English</span>
-                    <span class="en">中文</span>
-                    <span class="tooltiptext">
-                        <span class="zh">切换语言</span>
-                        <span class="en">Change Language</span>
-                    </span>
-                </button>
-            </div>
             <h1><i class="fas fa-chart-line"></i>
-                <span class="zh">加密货币指标分析器</span>
-                <span class="en">Crypto Indicator Analyzer</span>
+                加密货币指标分析器
             </h1>
             <p>
-                <span class="zh">EMA实时移动平均线和MACD分析</span>
-                <span class="en">Real-time Moving Averages & MACD Analysis</span>
+                EMA实时移动平均线和MACD分析
             </p>
         </div>
         
@@ -477,14 +541,12 @@
                     <div class="loading" id="loading" style="display: none;">
                         <i class="fas fa-spinner"></i>
                         <p class="glow">
-                            <span class="zh">加载数据中...</span>
-                            <span class="en">LOADING DATA...</span>
+                            加载数据中...
                         </p>
                     </div>
                     <div id="initial-message">
                         <p>
-                            <span class="zh">选择或搜索加密货币，然后点击生成图表按钮开始</span>
-                            <span class="en">Select or search a cryptocurrency and click Generate Chart to begin</span>
+                            选择或搜索加密货币，然后点击生成图表按钮开始
                         </p>
                     </div>
                 </div>
@@ -496,14 +558,38 @@
                     <div class="panel-header">
                         <div class="panel-title">
                             <i class="fas fa-sliders-h"></i>
-                            <span class="zh">控制面板</span>
-                            <span class="en">Dashboard</span>
+                            控制面板
                         </div>
-                        <div class="status" id="status"></div>
                     </div>
                     
                     <form id="chart-form" class="panel-content">
-                        <div class="quick-symbols-section">
+                        <!-- 将盘面趋势移到控制面板标题下方 -->
+                        <div class="market-trends-container">
+                            <div class="trends-header">
+                                <h3>
+                                    <i class="fas fa-chart-line"></i>
+                                    主流币盘面趋势
+                                </h3>
+                                <button type="button" id="refresh-trends-btn" class="refresh-btn tooltip">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span class="tooltiptext">
+                                        加载盘面趋势
+                                    </span>
+                                </button>
+                            </div>
+                            <div id="market-trends" class="market-trends">
+                                <div class="trend-message">
+                                    点击刷新按钮加载盘面趋势
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 将quick-symbols重命名为"主流币种选择"并放在搜索币种上方 -->
+                        <div class="form-group">
+                            <label for="quick-symbols">
+                                <i class="fas fa-star"></i>
+                                主流币:
+                            </label>
                             <div class="quick-symbols">
                                 <button type="button" class="pixel-btn" data-symbol="BTC">BTC</button>
                                 <button type="button" class="pixel-btn" data-symbol="ETH">ETH</button>
@@ -520,96 +606,69 @@
                         
                         <div class="form-group">
                             <label for="symbol"><i class="fas fa-search"></i>
-                                <span class="zh">搜索币种(仅支持已上线币安币种):</span>
-                                <span class="en">SYMBOL:</span>
+                                搜索币种 (仅支持已上线币安币种):
                             </label>
                             <input type="text" id="symbol" name="symbol" placeholder="BTC, ETH, SOL..." required>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="interval"><i class="fas fa-clock"></i>
-                                <span class="zh">时间周期:</span>
-                                <span class="en">Interval:</span>
-                            </label>
-                            <select id="interval" name="interval">
-                                <option value="15m">15 Minutes</option>
-                                <option value="1h">1 Hour</option>
-                                <option value="4h" selected>4 Hours</option>
-                                <option value="1d">1 Day</option>
-                                <option value="1w">1 Week</option>
-                            </select>
-                        </div>
-                        
-                        <!-- 市场信息卡片 -->
-                        <div id="market-info" class="info-card">
+                        <!-- 整合市场信息和市场分析为一个"币种分析"信息框 -->
+                        <div id="coin-analysis" class="info-card" style="display: none; margin-top: 5px;">
                             <h3>
-                                <span class="zh">市场信息</span>
-                                <span class="en">Market Info</span>
+                                币种分析
                             </h3>
                             <div class="data-row">
                                 <span class="data-label">
-                                    <span class="zh">当前价格</span>
-                                    <span class="en">Price</span>
+                                    当前价格
                                 </span>
                                 <span class="data-value" id="current-price">--</span>
                             </div>
-                        </div>
-                        
-                        <!-- 在 market-info 卡片后添加新的分析卡片 -->
-                        <div id="market-analysis" class="info-card" style="display: none;">
-                            <h3>
-                                <span class="zh">市场分析</span>
-                                <span class="en">Market Analysis</span>
-                            </h3>
                             <div class="data-row">
                                 <span class="data-label">
-                                    <span class="zh">市场趋势</span>
-                                    <span class="en">Trend</span>
+                                    市场趋势
                                 </span>
                                 <span class="data-value" id="market-trend">--</span>
                             </div>
                             <div class="data-row">
                                 <span class="data-label">
-                                    <span class="zh">MACD信号</span>
-                                    <span class="en">MACD Signal</span>
+                                    MACD信号
                                 </span>
                                 <span class="data-value" id="macd-signal">--</span>
                             </div>
                             <div class="data-row">
                                 <span class="data-label">
-                                    <span class="zh">风险等级</span>
-                                    <span class="en">Risk Level</span>
+                                    风险等级
                                 </span>
                                 <span class="data-value" id="risk-level">--</span>
                             </div>
                             <div class="data-row">
                                 <span class="data-label">
-                                    <span class="zh">支撑位</span>
-                                    <span class="en">Support</span>
+                                    支撑位
                                 </span>
                                 <span class="data-value" id="support-level">--</span>
                             </div>
                             <div class="data-row">
                                 <span class="data-label">
-                                    <span class="zh">阻力位</span>
-                                    <span class="en">Resistance</span>
+                                    阻力位
                                 </span>
                                 <span class="data-value" id="resistance-level">--</span>
                             </div>
                             <!-- 添加操作建议 -->
                             <div class="data-row">
                                 <span class="data-label">
-                                    <span class="zh">操作建议</span>
-                                    <span class="en">Advice</span>
+                                    操作建议
                                 </span>
                                 <span class="data-value advice-text" id="trading-advice">--</span>
                             </div>
                         </div>
                         
+                        <!-- 将状态消息移动到生成按钮上方 -->
+                        <div class="status-container">
+                            <div class="status" id="status"></div>
+                        </div>
+                        
                         <button type="submit" id="generate-btn" class="generate-btn">
                             <i class="fas fa-rocket"></i>
-                            <span class="zh">生成图表</span>
-                            <span class="en">Generate Chart</span>
+                            生成图表
                         </button>
                     </form>
                 </div>
@@ -618,8 +677,7 @@
         
         <div class="footer">
             <p>
-                <span class="zh">加密货币EMA分析器 v1.0.2 | 使用风险自负 | 非投资建议</span>
-                <span class="en">Crypto EMA Analyzer v1.0.2 | Use at your own risk | Not financial advice</span>
+                加密货币EMA分析器 v1.0.2 | 使用风险自负 | 非投资建议
             </p>
         </div>
     </div>
@@ -633,18 +691,21 @@
             const status = document.getElementById('status');
             const initialMessage = document.getElementById('initial-message');
             const quickButtons = document.querySelectorAll('.pixel-btn');
-            const langSwitch = document.getElementById('lang-switch');
             const generateBtn = document.getElementById('generate-btn');
-            const marketInfo = document.getElementById('market-info');
             const symbolInput = document.getElementById('symbol');
-            const intervalSelect = document.getElementById('interval');
+            
+            // 新增获取盘面趋势元素
+            const marketTrendsElement = document.getElementById('market-trends');
+            const refreshTrendsBtn = document.getElementById('refresh-trends-btn');
+            
+            // 获取币种分析元素
+            const coinAnalysis = document.getElementById('coin-analysis');
             
             // 存储状态
             const currentState = {
                 symbol: 'BTC',
-                interval: '4h',
-                language: 'zh',
-                lastFetchTime: 0
+                lastFetchTime: 0,
+                lastTrendsFetchTime: 0
             };
             
             // 本地存储key
@@ -659,10 +720,7 @@
                         Object.assign(currentState, prefs);
                         
                         // 应用设置
-                        document.documentElement.lang = currentState.language;
-                        updateLanguageDisplay();
                         symbolInput.value = currentState.symbol;
-                        intervalSelect.value = currentState.interval;
                         highlightActiveSymbol(currentState.symbol);
                     }
                 } catch (e) {
@@ -677,13 +735,6 @@
                 } catch (e) {
                     console.error('无法保存偏好设置:', e);
                 }
-            };
-            
-            // 更新语言显示
-            const updateLanguageDisplay = () => {
-                const isEnglish = currentState.language === 'en';
-                document.querySelectorAll('.zh').forEach(el => el.style.display = isEnglish ? 'none' : 'inline');
-                document.querySelectorAll('.en').forEach(el => el.style.display = isEnglish ? 'inline' : 'none');
             };
             
             // 高亮活动币种
@@ -713,7 +764,7 @@
                 // 验证输入
                 const symbolValue = symbolInput.value.trim();
                 if (!symbolValue) {
-                    setStatus(currentState.language === 'en' ? 'Please enter a symbol' : '请输入币种代码', true);
+                    setStatus('请输入币种代码', true);
                     return;
                 }
                 
@@ -726,7 +777,7 @@
                 chartImage.style.display = 'none';
                 initialMessage.style.display = 'none';
                 loading.style.display = 'block';
-                setStatus(currentState.language === 'en' ? 'Fetching data...' : '获取数据中...');
+                setStatus('获取数据中...');
                 
                 // 禁用按钮
                 generateBtn.disabled = true;
@@ -734,7 +785,7 @@
                 // 准备表单数据
                 const formData = new FormData();
                 formData.append('symbol', symbolValue);
-                formData.append('interval', intervalSelect.value);
+                formData.append('interval', '4h'); // 使用固定的4小时周期
                 
                 // 发送请求
                 fetch('/get_chart', {
@@ -753,67 +804,47 @@
                         // 显示图表
                         chartImage.src = 'data:image/png;base64,' + data.image;
                         chartImage.style.display = 'block';
-                        setStatus(currentState.language === 'en' ? 'Chart generated successfully!' : '图表生成成功！');
+                        setStatus('图表生成成功！');
                         
-                        // 更新市场信息
+                        // 更新币种分析信息
                         if (data.market_info) {
                             document.getElementById('current-price').textContent = data.market_info.price;
-                            marketInfo.style.display = 'block';
                         }
                         
-                        // 更新市场分析
+                        // 更新分析结果
                         if (data.analysis) {
-                            // 获取当前语言
-                            const lang = currentState.language;
-                            
-                            // 根据当前语言显示相应的分析结果
-                            const trend = lang === 'zh' ? data.analysis.trend : translate(data.analysis.trend, 'en');
-                            const signal = lang === 'zh' ? data.analysis.signal_type : translate(data.analysis.signal_type, 'en');
-                            const risk = lang === 'zh' ? data.analysis.risk_level : translate(data.analysis.risk_level, 'en');
-                            const advice = lang === 'zh' ? data.analysis.trading_advice : translate(data.analysis.trading_advice, 'en');
-                            
-                            document.getElementById('market-trend').textContent = trend;
-                            document.getElementById('macd-signal').textContent = signal;
-                            document.getElementById('risk-level').textContent = risk;
+                            document.getElementById('market-trend').textContent = data.analysis.trend;
+                            document.getElementById('macd-signal').textContent = data.analysis.signal_type;
+                            document.getElementById('risk-level').textContent = data.analysis.risk_level;
                             document.getElementById('support-level').textContent = data.analysis.support.toFixed(2);
                             document.getElementById('resistance-level').textContent = data.analysis.resistance.toFixed(2);
                             
                             // 添加操作建议
                             const adviceElement = document.getElementById('trading-advice');
-                            adviceElement.textContent = advice;
+                            adviceElement.textContent = data.analysis.trading_advice;
                             
                             // 根据建议内容设置颜色
-                            if (lang === 'zh') {
-                                if (advice.includes('买入') || advice.includes('上涨')) {
-                                    adviceElement.style.color = '#00FF00'; // 绿色
-                                } else if (advice.includes('卖出') || advice.includes('下跌')) {
-                                    adviceElement.style.color = '#FF4500'; // 红色
-                                } else if (advice.includes('观望')) {
-                                    adviceElement.style.color = '#FFFF00'; // 黄色
-                                } else if (advice.includes('谨慎')) {
-                                    adviceElement.style.color = '#FFA500'; // 橙色
-                                }
-                            } else {
-                                if (advice.includes('buy') || advice.includes('uptrend')) {
-                                    adviceElement.style.color = '#00FF00'; // 绿色
-                                } else if (advice.includes('sell') || advice.includes('downtrend')) {
-                                    adviceElement.style.color = '#FF4500'; // 红色
-                                } else if (advice.includes('wait')) {
-                                    adviceElement.style.color = '#FFFF00'; // 黄色
-                                } else if (advice.includes('cautious')) {
-                                    adviceElement.style.color = '#FFA500'; // 橙色
-                                }
+                            if (data.analysis.trading_advice.includes('买入') || 
+                                data.analysis.trading_advice.includes('上涨')) {
+                                adviceElement.style.color = '#00FF00'; // 绿色
+                            } else if (data.analysis.trading_advice.includes('卖出') || 
+                                      data.analysis.trading_advice.includes('下跌')) {
+                                adviceElement.style.color = '#FF4500'; // 红色
+                            } else if (data.analysis.trading_advice.includes('观望')) {
+                                adviceElement.style.color = '#FFFF00'; // 黄色
+                            } else if (data.analysis.trading_advice.includes('谨慎')) {
+                                adviceElement.style.color = '#FFA500'; // 橙色
                             }
                             
-                            document.getElementById('market-analysis').style.display = 'block';
+                            // 显示币种分析信息框
+                            coinAnalysis.style.display = 'block';
                         }
                     } else {
                         // 显示错误
                         chartImage.style.display = 'none';
                         initialMessage.style.display = 'block';
-                        const errorPrefix = currentState.language === 'en' ? 'Error: ' : '错误：';
-                        setStatus(errorPrefix + data.error, true);
-                        marketInfo.style.display = 'none';
+                        setStatus('错误：' + data.error, true);
+                        coinAnalysis.style.display = 'none';
                     }
                 })
                 .catch(error => {
@@ -823,9 +854,8 @@
                     initialMessage.style.display = 'block';
                     generateBtn.disabled = false;
                     
-                    const errorPrefix = currentState.language === 'en' ? 'Error: ' : '错误：';
-                    setStatus(errorPrefix + error.message, true);
-                    marketInfo.style.display = 'none';
+                    setStatus('错误：' + error.message, true);
+                    coinAnalysis.style.display = 'none';
                 });
             };
             
@@ -833,14 +863,6 @@
             const debouncedFetchData = debounce(fetchChartData, 300);
             
             // 事件监听器
-            
-            // 语言切换
-            langSwitch.addEventListener('click', () => {
-                currentState.language = currentState.language === 'zh' ? 'en' : 'zh';
-                document.documentElement.lang = currentState.language;
-                updateLanguageDisplay();
-                saveUserPreferences();
-            });
             
             // 快速选择按钮
             quickButtons.forEach(button => {
@@ -858,19 +880,9 @@
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 currentState.symbol = symbolInput.value;
-                currentState.interval = intervalSelect.value;
                 saveUserPreferences();
                 highlightActiveSymbol(currentState.symbol);
                 debouncedFetchData();
-            });
-            
-            // 周期变更
-            intervalSelect.addEventListener('change', function() {
-                currentState.interval = this.value;
-                saveUserPreferences();
-                if (symbolInput.value) {
-                    debouncedFetchData();
-                }
             });
             
             // 键盘快捷键
@@ -881,8 +893,125 @@
                 }
             });
             
+            // 获取所有币种的盘面趋势
+            const fetchMarketTrends = () => {
+                // 节流控制
+                const now = Date.now();
+                if (now - currentState.lastTrendsFetchTime < 5000) {
+                    setStatus('请稍等再刷新趋势', true);
+                    return;
+                }
+                currentState.lastTrendsFetchTime = now;
+                
+                // 显示加载中状态
+                refreshTrendsBtn.classList.add('loading');
+                refreshTrendsBtn.disabled = true;
+                
+                // 显示加载中
+                marketTrendsElement.innerHTML = `
+                    <div class="loading-trends">
+                        加载趋势中...
+                    </div>
+                `;
+                
+                // 获取所有快速选择币种的按钮
+                const symbolButtons = document.querySelectorAll('.pixel-btn');
+                const symbols = Array.from(symbolButtons).map(btn => btn.getAttribute('data-symbol'));
+                
+                // 发送请求
+                fetch('/get_market_trends', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        symbols: symbols,
+                        interval: '4h' // 固定使用4小时周期
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    // 恢复按钮状态
+                    refreshTrendsBtn.classList.remove('loading');
+                    refreshTrendsBtn.disabled = false;
+                    
+                    if (data.success) {
+                        displayMarketTrends(data.trends);
+                        setStatus('盘面趋势已更新');
+                    } else {
+                        marketTrendsElement.innerHTML = `
+                            <div class="error">
+                                获取趋势失败
+                            </div>
+                        `;
+                        setStatus('更新趋势失败', true);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取盘面趋势出错:', error);
+                    refreshTrendsBtn.classList.remove('loading');
+                    refreshTrendsBtn.disabled = false;
+                    
+                    marketTrendsElement.innerHTML = `
+                        <div class="error">
+                            获取趋势失败
+                        </div>
+                    `;
+                    setStatus('更新趋势失败', true);
+                });
+            };
+            
+            // 显示盘面趋势
+            const displayMarketTrends = (trends) => {
+                const trendsHtml = `
+                    <div class="trend-category">
+                        <span class="trend-title trend-yellow">
+                            突破上涨黄线
+                            <span class="trend-count">(${trends.above_ma4.length})</span>:
+                        </span>
+                        <span class="trend-symbols">${trends.above_ma4.join(', ') || '无'}</span>
+                    </div>
+                    <div class="trend-category">
+                        <span class="trend-title trend-green">
+                            突破上涨绿线
+                            <span class="trend-count">(${trends.above_ma3.length})</span>:
+                        </span>
+                        <span class="trend-symbols">${trends.above_ma3.join(', ') || '无'}</span>
+                    </div>
+                    <div class="trend-category">
+                        <span class="trend-title trend-neutral">
+                            MA线盘整
+                            <span class="trend-count">(${trends.between_ma3_ma5.length})</span>:
+                        </span>
+                        <span class="trend-symbols">${trends.between_ma3_ma5.join(', ') || '无'}</span>
+                    </div>
+                    <div class="trend-category">
+                        <span class="trend-title trend-green-down">
+                            到达底部绿线
+                            <span class="trend-count">(${trends.below_ma5.length})</span>:
+                        </span>
+                        <span class="trend-symbols">${trends.below_ma5.join(', ') || '无'}</span>
+                    </div>
+                    <div class="trend-category">
+                        <span class="trend-title trend-blue">
+                            到达底部蓝线
+                            <span class="trend-count">(${trends.below_ma6.length})</span>:
+                        </span>
+                        <span class="trend-symbols">${trends.below_ma6.join(', ') || '无'}</span>
+                    </div>
+                `;
+                
+                marketTrendsElement.innerHTML = trendsHtml;
+            };
+            
             // 初始化
             loadUserPreferences();
+            
+            // 添加刷新盘面趋势按钮的事件监听器
+            refreshTrendsBtn.addEventListener('click', fetchMarketTrends);
             
             // 首次加载时自动生成图表
             setTimeout(() => {
@@ -891,49 +1020,10 @@
                 }
                 highlightActiveSymbol(symbolInput.value);
                 debouncedFetchData();
+                // 页面加载时自动获取盘面趋势(保留，但可以被按钮替代)
+                fetchMarketTrends();
             }, 500);
         });
-
-        // 添加翻译映射
-        const translations = {
-            // 趋势翻译
-            "强势上升": "Strong Uptrend",
-            "上升": "Uptrend",
-            "强势下降": "Strong Downtrend",
-            "下降": "Downtrend",
-            "横盘整理": "Consolidation",
-            
-            // MACD信号翻译
-            "金叉后动能增强": "Strong Golden Cross",
-            "金叉": "Golden Cross",
-            "死叉后动能增强": "Strong Death Cross",
-            "死叉": "Death Cross",
-            
-            // 风险等级翻译
-            "高": "High",
-            "中": "Medium",
-            "低": "Low",
-            
-            // 操作建议翻译
-            "接近阻力位，谨慎追高": "Caution Near Resistance",
-            "强势上涨趋势，可考虑买入": "Buy Strong Uptrend.",
-            "上升趋势形成，可分批买入": "Buy Gradually.",
-            "接近支撑位，可能反弹": "Possible Rebound",
-            "下跌趋势，建议观望或减仓": "Reduce Position",
-            "强势下跌，建议观望": "Wait For Reversal",
-            "MACD柱状图转正, 可能是买入信号": "Positive MACD, buy signal.",
-            "MACD柱状图转负, 可能是卖出信号": "Negative MACD, sell signal.",
-            "接近支撑位，可考虑小仓位试探": "Consider small position.",
-            "接近阻力位，注意可能回调": "Watch For Pullback",
-            "价格接近均线，等待方向确认": "Wait For Direction.",
-            "市场信号不明确，建议观望": "Wait and see."
-        };
-
-        // 翻译函数
-        function translate(text, toLang) {
-            if (toLang === 'zh') return text;
-            return translations[text] || text;
-        }
     </script>
 </body>
 </html>

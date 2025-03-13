@@ -12,6 +12,7 @@ import logging
 import requests
 import json
 import time
+import concurrent.futures
 from datetime import datetime as dt
 
 app = Flask(__name__)
@@ -370,7 +371,7 @@ def get_chart():
         if not symbol.endswith('USDT'):
             symbol = symbol + 'USDT'
         
-        interval = request.form.get('interval', '4h')
+        interval = request.form.get('interval', '4h')  # 默认使用4小时
         
         bot = TradingBot(symbol=symbol, interval=interval)
         img_str, error = bot.generate_plot()
@@ -395,6 +396,94 @@ def get_chart():
     except Exception as e:
         app.logger.error(f"处理请求时出错: {e}")
         return jsonify({'success': False, 'error': str(e)})
+
+# 新增获取盘面趋势的API端点
+@app.route('/get_market_trends', methods=['POST'])
+def get_market_trends():
+    try:
+        # 获取请求数据
+        data = request.json
+        symbols = data.get('symbols', [])
+        interval = data.get('interval', '4h')  # 默认使用4小时
+        
+        # 确保所有币种都以USDT结尾
+        symbols = [symbol.upper() + 'USDT' if not symbol.upper().endswith('USDT') else symbol.upper() for symbol in symbols]
+        
+        app.logger.info(f"获取多币种趋势: {symbols}, 周期: {interval}")
+        
+        # 定义趋势分类
+        trends = {
+            'above_ma4': [],    # 突破上涨黄线
+            'above_ma3': [],    # 突破上涨绿线
+            'between_ma3_ma5': [],  # MA线之间
+            'below_ma5': [],    # 到达底部绿线
+            'below_ma6': []     # 到达底部蓝线
+        }
+        
+        # 使用线程池并行获取数据
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            # 提交任务到线程池并保存 Future 对象
+            future_to_symbol = {executor.submit(analyze_symbol_trend, symbol, interval): symbol.replace('USDT', '') for symbol in symbols}
+            
+            # 处理结果
+            for future in concurrent.futures.as_completed(future_to_symbol):
+                symbol = future_to_symbol[future]
+                try:
+                    result = future.result()
+                    if result:
+                        # 根据结果将币种放入相应的趋势类别
+                        category = result['category']
+                        if category in trends:
+                            trends[category].append(symbol)
+                except Exception as e:
+                    app.logger.error(f"处理 {symbol} 趋势时出错: {e}")
+        
+        return jsonify({
+            'success': True,
+            'trends': trends
+        })
+    except Exception as e:
+        app.logger.error(f"获取盘面趋势时出错: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
+
+# 分析单个币种的趋势类别
+def analyze_symbol_trend(symbol, interval):
+    try:
+        bot = TradingBot(symbol=symbol, interval=interval)
+        
+        # 检查数据是否有效
+        if bot.indicators.empty:
+            return None
+            
+        # 获取最新的数据点
+        latest = bot.indicators.iloc[-1]
+        
+        # 分析当前价格与各MA线的关系
+        price = latest['MA1']  # MA1是当前价格
+        ma2 = latest['MA2']    # 中线
+        ma3 = latest['MA3']    # 上绿线
+        ma4 = latest['MA4']    # 上黄线
+        ma5 = latest['MA5']    # 下绿线
+        ma6 = latest['MA6']    # 下蓝线
+        
+        # 判断趋势类别
+        if price > ma4:
+            return {'category': 'above_ma4'}
+        elif price > ma3:
+            return {'category': 'above_ma3'}
+        elif price > ma5:
+            return {'category': 'between_ma3_ma5'}
+        elif price > ma6:
+            return {'category': 'below_ma5'}
+        else:
+            return {'category': 'below_ma6'}
+            
+    except Exception as e:
+        app.logger.error(f"分析 {symbol} 趋势时出错: {e}")
+        return None
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=6969)
