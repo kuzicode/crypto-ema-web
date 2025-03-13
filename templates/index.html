@@ -6,7 +6,7 @@
     <!-- 添加 favicon -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <title>Crypto Indicator Analyzer | 加密货币指标分析器</title>
+    <title>CyberAI | 加密货币指标分析器</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         :root {
@@ -51,23 +51,38 @@
         
         /* 头部样式 */
         .header {
-            text-align: center;
+            text-align: left;
             margin-bottom: 10px;
-            border-bottom: 2px solid var(--accent-color);
+            border-bottom: 1px solid var(--grid-color);
             padding-bottom: 10px;
             text-shadow: 0 0 10px var(--accent-color);
             position: relative;
         }
         
         .header h1 {
-            font-size: 24px;
-            color: var(--accent-color);
+            font-size: 22px;
+            color: #FFFFFF;
             margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        }
+        
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+            flex-shrink: 0;
         }
         
         .header p {
             color: var(--text-color);
             font-size: 12px;
+            padding-left: 32px; /* 与图标对齐 */
         }
         
         /* 主内容区布局 */
@@ -523,14 +538,11 @@
 <body>
     <div class="crt-effect"></div>
     <div class="container">
-        <!-- 标题部分 -->
         <div class="header">
-            <h1><i class="fas fa-chart-line"></i>
-                加密货币指标分析器
+            <h1>
+                <img src="{{ url_for('static', filename='favicon.ico') }}" alt="Logo" class="header-logo">
+                CyberAI
             </h1>
-            <p>
-                EMA实时移动平均线和MACD分析
-            </p>
         </div>
         
         <div class="main-content">
@@ -677,7 +689,7 @@
         
         <div class="footer">
             <p>
-                加密货币EMA分析器 v1.0.2 | 使用风险自负 | 非投资建议
+                © 2025 BTC TO THE MOON
             </p>
         </div>
     </div>
