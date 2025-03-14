@@ -23,11 +23,11 @@ build/
 # 环境变量和配置文件
 .env
 .env.local
-.crypto_alert_config
+.mail_config
 
 # 数据和日志文件
 *.log
-token_alerts.json
+mail_alerts.json
 
 # 测试覆盖率报告
 .coverage

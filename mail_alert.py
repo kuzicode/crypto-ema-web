@@ -23,13 +23,13 @@ logger = logging.getLogger(__name__)
 # 配置参数
 TOKENS = ["BTC", "ETH", "SOL"]  # 要监控的代币
 INTERVAL = "4h"  # K线周期
-JSON_FILE = "token_alerts.json"  # JSON文件路径
+JSON_FILE = "mail_alerts.json"  # JSON文件路径
 CHECK_INTERVAL = 300  # 检查间隔（秒），5分钟
 
 # 邮件配置
 def load_email_config():
     """从配置文件加载邮件配置"""
-    config_path = ".crypto_alert_config"
+    config_path = ".mail_config"
     default_config = {
         "smtp_server": "smtp.qq.com",
         "smtp_port": 465,
