@@ -1,6 +1,6 @@
 # Crypto EMA Web App
 
-一个加密货币技术分析工具，显示移动平均线(EMA)和MACD指标。
+一个加密货币技术分析工具
 
 
 ## Installation
@@ -11,9 +11,7 @@
 mkdir -p crypto-ema-web/templates
 cd crypto-ema-web
 python3 -m venv .venv
-source .venv/bin/activate  # Linux/Mac
-# Or on Windows:
-# .venv\Scripts\activate
+source .venv/bin/activate
 ```
 
 2. Install dependencies:
@@ -23,12 +21,6 @@ pip install -r requirements.txt
 ```
 
 3. Run the application:
-
-```bash
-flask run --host=0.0.0.0 --port=6969
-```
-
-Or:
 
 ```bash
 python app.py
