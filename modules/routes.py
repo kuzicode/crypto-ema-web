@@ -92,7 +92,7 @@ def init_routes(app):
                         result = future.result()
                         if result:
                             # 根据结果将币种放入相应的趋势类别
-                            category = result['category']
+                            category = result['token_trend']
                             if category in trends:
                                 trends[category].append(symbol)
                     except Exception as e:

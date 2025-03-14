@@ -363,7 +363,7 @@ def token_trend(symbol, interval):
         interval (str): K线周期，如1h, 4h, 1d
         
     Returns:
-        dict: 包含趋势类别的字典，如 {'category': 'above_ma4'}
+        dict: 包含趋势类别的字典，如 {'token_trend': 'above_ma4'}
         None: 如果分析失败
     """
     try:
@@ -386,15 +386,15 @@ def token_trend(symbol, interval):
         
         # 判断趋势类别
         if price > ma4:
-            return {'category': 'above_ma4'}
+            return {'token_trend': 'above_ma4'}
         elif price > ma3:
-            return {'category': 'above_ma3'}
+            return {'token_trend': 'above_ma3'}
         elif price > ma5:
-            return {'category': 'between_ma3_ma5'}
+            return {'token_trend': 'between_ma3_ma5'}
         elif price > ma6:
-            return {'category': 'below_ma5'}
+            return {'token_trend': 'below_ma5'}
         else:
-            return {'category': 'below_ma6'}
+            return {'token_trend': 'below_ma6'}
             
     except Exception as e:
         logger.error(f"分析 {symbol} 趋势时出错: {e}")
