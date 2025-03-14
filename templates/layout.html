@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 添加 favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>Cash⚡Miner | 加密货币指标分析</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    {% include 'partials/styles.html' %}
+</head>
+<body>
+    <div class="crt-effect"></div>
+    <div class="container">
+        {% include 'partials/header.html' %}
+        
+        <div class="main-content">
+            {% include 'partials/indicator.html' %}
+            {% include 'partials/sniper.html' %}
+            {% include 'partials/aiagent.html' %}
+        </div>
+        
+        {% include 'partials/footer.html' %}
+    </div>
+    
+    {% include 'partials/scripts.html' %}
+</body>
+</html> 

@@ -1,0 +1,376 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 导航菜单功能
+        const navItems = document.querySelectorAll('.nav-item');
+        const pages = document.querySelectorAll('.page-content');
+        
+        // 初始化页面状态
+        function updatePageVisibility(targetPageId) {
+            console.log('切换到页面:', targetPageId);
+            
+            // 显示对应页面
+            pages.forEach(page => {
+                const isTargetPage = page.id === targetPageId;
+                page.classList.toggle('active', isTargetPage);
+                console.log(`页面 ${page.id} 状态:`, isTargetPage ? '显示' : '隐藏');
+            });
+        }
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 更新导航项的活动状态
+                navItems.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 获取目标页面ID
+                const targetPage = this.getAttribute('data-page');
+                const targetPageId = `${targetPage}-page`;
+                
+                // 更新页面显示
+                updatePageVisibility(targetPageId);
+            });
+        });
+        
+        // 元素引用
+        const form = document.getElementById('chart-form');
+        const chartImage = document.getElementById('chart-image');
+        const loading = document.getElementById('loading');
+        const status = document.getElementById('status');
+        const initialMessage = document.getElementById('initial-message');
+        const quickButtons = document.querySelectorAll('.pixel-btn');
+        const generateBtn = document.getElementById('generate-btn');
+        const symbolInput = document.getElementById('symbol');
+        
+        // 新增获取盘面趋势元素
+        const marketTrendsElement = document.getElementById('market-trends');
+        const refreshTrendsBtn = document.getElementById('refresh-trends-btn');
+        
+        // 获取币种分析元素
+        const coinAnalysis = document.getElementById('coin-analysis');
+        
+        // 存储状态
+        const currentState = {
+            symbol: 'BTC',
+            lastFetchTime: 0,
+            lastTrendsFetchTime: 0
+        };
+        
+        // 本地存储key
+        const STORAGE_KEY = 'cryptoAnalyzerPrefs';
+        
+        // 加载用户偏好
+        const loadUserPreferences = () => {
+            try {
+                const savedPrefs = localStorage.getItem(STORAGE_KEY);
+                if (savedPrefs) {
+                    const prefs = JSON.parse(savedPrefs);
+                    Object.assign(currentState, prefs);
+                    
+                    // 应用设置
+                    symbolInput.value = currentState.symbol;
+                    highlightActiveSymbol(currentState.symbol);
+                }
+            } catch (e) {
+                console.error('无法加载偏好设置:', e);
+            }
+        };
+        
+        // 保存用户偏好
+        const saveUserPreferences = () => {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(currentState));
+            } catch (e) {
+                console.error('无法保存偏好设置:', e);
+            }
+        };
+        
+        // 高亮活动币种
+        const highlightActiveSymbol = (symbol) => {
+            quickButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-symbol') === symbol);
+            });
+        };
+        
+        // 防抖函数
+        const debounce = (func, wait) => {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        };
+        
+        // 设置状态消息
+        const setStatus = (message, isError = false) => {
+            status.textContent = message;
+            status.classList.toggle('error', isError);
+        };
+        
+        // 获取图表数据
+        const fetchChartData = () => {
+            // 验证输入
+            const symbolValue = symbolInput.value.trim();
+            if (!symbolValue) {
+                setStatus('请输入币种代码', true);
+                return;
+            }
+            
+            // 节流控制
+            const now = Date.now();
+            if (now - currentState.lastFetchTime < 2000) return;
+            currentState.lastFetchTime = now;
+            
+            // 显示加载状态
+            chartImage.style.display = 'none';
+            initialMessage.style.display = 'none';
+            loading.style.display = 'block';
+            setStatus('获取数据中...');
+            
+            // 禁用按钮
+            generateBtn.disabled = true;
+            
+            // 准备表单数据
+            const formData = new FormData();
+            formData.append('symbol', symbolValue);
+            formData.append('interval', '4h'); // 使用固定的4小时周期
+            
+            // 发送请求
+            fetch('/get_chart', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                loading.style.display = 'none';
+                generateBtn.disabled = false;
+                
+                if (data.success) {
+                    // 显示图表
+                    chartImage.src = 'data:image/png;base64,' + data.image;
+                    chartImage.style.display = 'block';
+                    setStatus('图表生成成功！');
+                    
+                    // 更新币种分析信息
+                    if (data.market_info) {
+                        document.getElementById('current-price').textContent = data.market_info.price;
+                    }
+                    
+                    // 更新分析结果
+                    if (data.analysis) {
+                        document.getElementById('market-trend').textContent = data.analysis.trend;
+                        document.getElementById('macd-signal').textContent = data.analysis.signal_type;
+                        document.getElementById('risk-level').textContent = data.analysis.risk_level;
+                        document.getElementById('support-level').textContent = data.analysis.support.toFixed(2);
+                        document.getElementById('resistance-level').textContent = data.analysis.resistance.toFixed(2);
+                        
+                        // 添加操作建议
+                        const adviceElement = document.getElementById('trading-advice');
+                        adviceElement.textContent = data.analysis.trading_advice;
+                        
+                        // 根据建议内容设置颜色
+                        if (data.analysis.trading_advice.includes('买入') || 
+                            data.analysis.trading_advice.includes('上涨')) {
+                            adviceElement.style.color = '#00FF00'; // 绿色
+                        } else if (data.analysis.trading_advice.includes('卖出') || 
+                                  data.analysis.trading_advice.includes('下跌')) {
+                            adviceElement.style.color = '#FF4500'; // 红色
+                        } else if (data.analysis.trading_advice.includes('观望')) {
+                            adviceElement.style.color = '#FFFF00'; // 黄色
+                        } else if (data.analysis.trading_advice.includes('谨慎')) {
+                            adviceElement.style.color = '#FFA500'; // 橙色
+                        }
+                        
+                        // 显示币种分析信息框
+                        coinAnalysis.style.display = 'block';
+                    }
+                } else {
+                    // 显示错误
+                    chartImage.style.display = 'none';
+                    initialMessage.style.display = 'block';
+                    setStatus('错误：' + data.error, true);
+                    coinAnalysis.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                // 处理异常
+                loading.style.display = 'none';
+                chartImage.style.display = 'none';
+                initialMessage.style.display = 'block';
+                generateBtn.disabled = false;
+                
+                setStatus('错误：' + error.message, true);
+                coinAnalysis.style.display = 'none';
+            });
+        };
+        
+        // 带防抖的查询函数
+        const debouncedFetchData = debounce(fetchChartData, 300);
+        
+        // 事件监听器
+        
+        // 快速选择按钮
+        quickButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const symbol = this.getAttribute('data-symbol');
+                symbolInput.value = symbol;
+                currentState.symbol = symbol;
+                highlightActiveSymbol(symbol);
+                saveUserPreferences();
+                fetchChartData();
+            });
+        });
+        
+        // 表单提交
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            currentState.symbol = symbolInput.value;
+            saveUserPreferences();
+            highlightActiveSymbol(currentState.symbol);
+            debouncedFetchData();
+        });
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && document.activeElement === symbolInput) {
+                e.preventDefault();
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+        
+        // 获取所有币种的盘面趋势
+        const fetchMarketTrends = () => {
+            // 节流控制
+            const now = Date.now();
+            if (now - currentState.lastTrendsFetchTime < 5000) {
+                setStatus('请稍等再刷新趋势', true);
+                return;
+            }
+            currentState.lastTrendsFetchTime = now;
+            
+            // 显示加载中状态
+            refreshTrendsBtn.classList.add('loading');
+            refreshTrendsBtn.disabled = true;
+            
+            // 显示加载中
+            marketTrendsElement.innerHTML = `
+                <div class="loading-trends">
+                    加载趋势中...
+                </div>
+            `;
+            
+            // 获取所有快速选择币种的按钮
+            const symbolButtons = document.querySelectorAll('.pixel-btn');
+            const symbols = Array.from(symbolButtons).map(btn => btn.getAttribute('data-symbol'));
+            
+            // 发送请求
+            fetch('/get_market_trends', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    symbols: symbols,
+                    interval: '4h' // 固定使用4小时周期
+                })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                // 恢复按钮状态
+                refreshTrendsBtn.classList.remove('loading');
+                refreshTrendsBtn.disabled = false;
+                
+                if (data.success) {
+                    displayMarketTrends(data.trends);
+                    setStatus('盘面趋势已更新');
+                } else {
+                    marketTrendsElement.innerHTML = `
+                        <div class="error">
+                            获取趋势失败
+                        </div>
+                    `;
+                    setStatus('更新趋势失败', true);
+                }
+            })
+            .catch(error => {
+                console.error('获取盘面趋势出错:', error);
+                refreshTrendsBtn.classList.remove('loading');
+                refreshTrendsBtn.disabled = false;
+                
+                marketTrendsElement.innerHTML = `
+                    <div class="error">
+                        获取趋势失败
+                    </div>
+                `;
+                setStatus('更新趋势失败', true);
+            });
+        };
+        
+        // 显示盘面趋势
+        const displayMarketTrends = (trends) => {
+            const trendsHtml = `
+                <div class="trend-category">
+                    <span class="trend-title trend-yellow">
+                        突破上涨黄线
+                        <span class="trend-count">(${trends.above_ma4.length})</span>:
+                    </span>
+                    <span class="trend-symbols">${trends.above_ma4.join(', ') || '无'}</span>
+                </div>
+                <div class="trend-category">
+                    <span class="trend-title trend-green">
+                        突破上涨绿线
+                        <span class="trend-count">(${trends.above_ma3.length})</span>:
+                    </span>
+                    <span class="trend-symbols">${trends.above_ma3.join(', ') || '无'}</span>
+                </div>
+                <div class="trend-category">
+                    <span class="trend-title trend-neutral">
+                        MA线盘整区
+                        <span class="trend-count">(${trends.between_ma3_ma5.length})</span>:
+                    </span>
+                    <span class="trend-symbols">${trends.between_ma3_ma5.join(', ') || '无'}</span>
+                </div>
+                <div class="trend-category">
+                    <span class="trend-title trend-green-down">
+                        跌破底部绿线
+                        <span class="trend-count">(${trends.below_ma5.length})</span>:
+                    </span>
+                    <span class="trend-symbols">${trends.below_ma5.join(', ') || '无'}</span>
+                </div>
+                <div class="trend-category">
+                    <span class="trend-title trend-blue">
+                        跌破底部蓝线
+                        <span class="trend-count">(${trends.below_ma6.length})</span>:
+                    </span>
+                    <span class="trend-symbols">${trends.below_ma6.join(', ') || '无'}</span>
+                </div>
+            `;
+            
+            marketTrendsElement.innerHTML = trendsHtml;
+        };
+        
+        // 初始化
+        loadUserPreferences();
+        
+        // 添加刷新盘面趋势按钮的事件监听器
+        refreshTrendsBtn.addEventListener('click', fetchMarketTrends);
+        
+        // 首次加载时自动生成图表
+        setTimeout(() => {
+            if (!symbolInput.value) {
+                symbolInput.value = currentState.symbol || 'BTC';
+            }
+            highlightActiveSymbol(symbolInput.value);
+            debouncedFetchData();
+            // 页面加载时自动获取盘面趋势(保留，但可以被按钮替代)
+            fetchMarketTrends();
+        }, 500);
+    });
+</script> 

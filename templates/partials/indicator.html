@@ -1,0 +1,142 @@
+<!-- 指标线图页面 -->
+<div id="indicator-page" class="page-content active">
+    <!-- 图表区域 -->
+    <div class="chart-section">
+        <div class="chart-container">
+            <img id="chart-image" style="display: none;">
+            <div class="loading" id="loading" style="display: none;">
+                <i class="fas fa-spinner"></i>
+                <p class="glow">
+                    加载数据中...
+                </p>
+            </div>
+            <div id="initial-message">
+                <p>
+                    选择或搜索加密货币，然后点击生成图表按钮开始
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 控制区域 -->
+    <div class="controls-section">
+        <div class="control-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-sliders-h"></i>
+                    控制面板
+                </div>
+            </div>
+            
+            <form id="chart-form" class="panel-content">
+                <!-- 将盘面趋势移到控制面板标题下方 -->
+                <div class="market-trends-container">
+                    <div class="trends-header">
+                        <h3>
+                            <i class="fas fa-chart-line"></i>
+                            主流币盘面趋势
+                        </h3>
+                        <button type="button" id="refresh-trends-btn" class="refresh-btn tooltip">
+                            <i class="fas fa-sync-alt"></i>
+                            <span class="tooltiptext">
+                                加载盘面趋势
+                            </span>
+                        </button>
+                    </div>
+                    <div id="market-trends" class="market-trends">
+                        <div class="trend-message">
+                            点击刷新按钮加载盘面趋势
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 将quick-symbols重命名为"主流币种选择"并放在搜索币种上方 -->
+                <div class="form-group">
+                    <label for="quick-symbols">
+                        <i class="fas fa-star"></i>
+                        主流币:
+                    </label>
+                    <div class="quick-symbols">
+                        <button type="button" class="pixel-btn" data-symbol="BTC">BTC</button>
+                        <button type="button" class="pixel-btn" data-symbol="ETH">ETH</button>
+                        <button type="button" class="pixel-btn" data-symbol="SOL">SOL</button>
+                        <button type="button" class="pixel-btn" data-symbol="BNB">BNB</button>
+                        <button type="button" class="pixel-btn" data-symbol="XRP">XRP</button>
+                        <button type="button" class="pixel-btn" data-symbol="DOGE">DOGE</button>
+                        <button type="button" class="pixel-btn" data-symbol="LINK">LINK</button>
+                        <button type="button" class="pixel-btn" data-symbol="SUI">SUI</button>
+                        <button type="button" class="pixel-btn" data-symbol="LTC">LTC</button>
+                        <button type="button" class="pixel-btn" data-symbol="UNI">UNI</button>                              
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="symbol"><i class="fas fa-search"></i>
+                        搜索币种 (仅支持已上线币安币种):
+                    </label>
+                    <input type="text" id="symbol" name="symbol" placeholder="BTC, ETH, SOL..." required>
+                </div>
+                
+                <!-- 整合市场信息和市场分析为一个"币种分析"信息框 -->
+                <div id="coin-analysis" class="info-card" style="display: none; margin-top: 5px;">
+                    <h3>
+                        币种分析
+                    </h3>
+                    <div class="data-row">
+                        <span class="data-label">
+                            当前价格
+                        </span>
+                        <span class="data-value" id="current-price">--</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">
+                            市场趋势
+                        </span>
+                        <span class="data-value" id="market-trend">--</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">
+                            MACD信号
+                        </span>
+                        <span class="data-value" id="macd-signal">--</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">
+                            风险等级
+                        </span>
+                        <span class="data-value" id="risk-level">--</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">
+                            支撑位
+                        </span>
+                        <span class="data-value" id="support-level">--</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">
+                            阻力位
+                        </span>
+                        <span class="data-value" id="resistance-level">--</span>
+                    </div>
+                    <!-- 添加操作建议 -->
+                    <div class="data-row">
+                        <span class="data-label">
+                            操作建议
+                        </span>
+                        <span class="data-value advice-text" id="trading-advice">--</span>
+                    </div>
+                </div>
+                
+                <!-- 将状态消息移动到生成按钮上方 -->
+                <div class="status-container">
+                    <div class="status" id="status"></div>
+                </div>
+                
+                <button type="submit" id="generate-btn" class="generate-btn">
+                    <i class="fas fa-rocket"></i>
+                    生成图表
+                </button>
+            </form>
+        </div>
+    </div>
+</div> 

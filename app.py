@@ -362,7 +362,7 @@ class TradingBot:
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('layout.html')
 
 @app.route('/get_chart', methods=['POST'])
 def get_chart():

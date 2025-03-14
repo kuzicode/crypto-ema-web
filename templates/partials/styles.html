@@ -1,0 +1,605 @@
+<style>
+    /* 添加字体链接 */
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@500;700&family=Audiowide&display=swap');
+    
+    :root {
+        --bg-color: #000033;
+        --text-color: #00FF00;
+        --accent-color: #00FFFF;
+        --accent2-color: #FF00FF;
+        --grid-color: #4B0082;
+        --card-bg: #000044;
+        --button-bg: #003366;
+        --button-hover: #0066CC;
+        --light-blue: #87CEFA; /* 添加浅蓝色变量 */
+    }
+    
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        line-height: 1.6;
+        padding: 10px;
+        font-size: 14px;
+        background-image: 
+            linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        height: 100vh;
+        overflow: hidden;
+    }
+    
+    .container {
+        max-width: 100%;
+        height: calc(100vh - 20px);
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* 头部样式 */
+    .header {
+        text-align: left;
+        margin-bottom: 10px;
+        border-bottom: 1px solid var(--grid-color);
+        padding-bottom: 8px;
+        text-shadow: 0 0 10px var(--accent-color);
+        position: relative;
+    }
+    
+    /* 导航栏样式 */
+    .nav-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0;
+    }
+    
+    .brand {
+        display: flex;
+        align-items: center;
+        margin-right: 30px;
+    }
+    
+    .brand-logo {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+        filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+        flex-shrink: 0;
+        margin-right: 2px; /* 增加logo与文字的间距 */
+    }
+    
+    .brand-name {
+        font-size: 22px; /* 增大字体大小 */
+        color: #FFFFFF;
+        font-weight: 700; /* 加粗字体 */
+        letter-spacing: 2px; /* 增加字间距 */
+        text-transform: uppercase; /* 转为大写 */
+        font-family: 'Orbitron', 'Rajdhani', 'Audiowide', sans-serif; /* 使用更科技感的字体 */
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.7), 0 0 20px rgba(0, 255, 255, 0.4); /* 增强发光效果 */
+        background: linear-gradient(to right, #FFFFFF, #00FFFF); /* 添加渐变色 */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+        padding: 0 5px;
+    }
+    
+    .nav-menu {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .nav-item {
+        color: var(--light-blue); /* 将默认颜色改为浅蓝色 */
+        font-size: 16px;
+        text-decoration: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: all 0.3s;
+    }
+    
+    .nav-item:hover {
+        color: var(--accent-color);
+        text-shadow: 0 0 5px var(--accent-color);
+    }
+    
+    .nav-item.active {
+        color: var(--accent-color);
+        text-shadow: 0 0 8px var(--accent-color);
+        font-weight: 500;
+    }
+    
+    .page-title {
+        display: none;
+    }
+    
+    /* 内容页面 */
+    .page-content {
+        display: none;
+        width: 100%;
+    }
+    
+    .page-content.active {
+        display: flex;
+        flex: 1;
+        gap: 10px;
+    }
+    
+    /* Coming Soon 页面 */
+    .coming-soon {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+        background-color: var(--card-bg);
+        border: 2px solid var(--accent-color);
+        border-radius: 8px;
+        padding: 40px;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        color: var(--accent-color);
+    }
+    
+    .coming-soon h2 {
+        font-size: 36px;
+        margin-bottom: 20px;
+        text-shadow: 0 0 15px var(--accent-color);
+    }
+    
+    .coming-soon p {
+        font-size: 18px;
+        text-align: center;
+    }
+    
+    /* 主内容区布局 */
+    .main-content {
+        display: flex;
+        flex: 1;
+        gap: 10px;
+        overflow: hidden;
+    }
+    
+    /* 图表区域 */
+    .chart-section {
+        flex: 80;
+        min-width: 0;
+        overflow: hidden;
+    }
+    
+    /* 控制区域 */
+    .controls-section {
+        flex: 20;
+        min-width: 250px;
+        max-width: 350px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    
+    /* 控制面板 */
+    .control-panel {
+        background-color: var(--card-bg);
+        border: 2px solid var(--accent-color);
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .panel-header {
+        border-bottom: 1px dashed var(--text-color);
+        padding-bottom: 8px;
+        margin-bottom: 10px;
+    }
+    
+    .panel-title {
+        font-size: 15px;
+        color: var(--accent-color);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .status {
+        color: var(--accent-color);
+        font-size: 12px;
+        height: 15px;
+        margin-top: 5px;
+        font-weight: 500;
+    }
+    
+    .status-container {
+        text-align: center;
+        margin: 15px 0 10px 0;
+        min-height: 15px;
+    }
+    
+    .error {
+        color: #FF0000;
+    }
+    
+    .panel-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
+    }
+    
+    /* 快速选择按钮 */
+    .quick-symbols {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 5px;
+    }
+    
+    .pixel-btn {
+        background-color: var(--button-bg);
+        color: var(--accent-color);
+        border: none;
+        padding: 4px 8px;
+        margin-bottom: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        position: relative;
+        clip-path: polygon(
+            0% 0%, 95% 0%, 100% 5%, 100% 100%, 5% 100%, 0% 95%
+        );
+        transition: background-color 0.2s, transform 0.2s;
+    }
+    
+    .pixel-btn:hover {
+        background-color: var(--button-hover);
+        transform: translateY(-2px);
+    }
+    
+    .pixel-btn.active {
+        background-color: var(--button-hover);
+        box-shadow: 0 0 10px var(--accent-color);
+    }
+    
+    /* 表单样式 */
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--text-color);
+        font-size: 12px;
+    }
+    
+    .form-group input, 
+    .form-group select {
+        width: 100%;
+        padding: 6px 8px;
+        background-color: var(--bg-color);
+        color: var(--accent-color);
+        border: 1px solid var(--text-color);
+        border-radius: 4px;
+        font-size: 13px;
+    }
+    
+    /* 生成按钮 */
+    .generate-btn {
+        background-color: var(--button-bg);
+        color: var(--accent-color);
+        border: 2px solid var(--accent-color);
+        padding: 7px 14px;
+        cursor: pointer;
+        font-size: 13px;
+        border-radius: 4px;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        margin-top: auto;
+    }
+    
+    .generate-btn:hover {
+        background-color: var(--button-hover);
+        box-shadow: 0 0 10px var(--accent-color);
+        transform: translateY(-2px);
+    }
+    
+    /* 图表容器 */
+    .chart-container {
+        background-color: var(--bg-color);
+        border: 2px solid var(--accent-color);
+        border-radius: 8px;
+        padding: 15px;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    #chart-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+    
+    /* 加载动画 */
+    .loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: var(--accent-color);
+        text-align: center;
+    }
+    
+    .loading .fa-spinner {
+        font-size: 40px;
+        margin-bottom: 10px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* 市场信息卡片 */
+    .info-card {
+        background-color: rgba(0, 0, 68, 0.7);
+        border: 1px solid var(--accent-color);
+        border-radius: 4px;
+        padding: 8px;
+        font-size: 11px;
+    }
+    
+    .info-card h3 {
+        color: var(--accent-color);
+        font-size: 14px;
+        margin-bottom: 5px;
+        border-bottom: 1px dashed var(--text-color);
+        padding-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .info-card .data-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3px;
+    }
+    
+    .info-card .data-value {
+        color: var(--accent-color);
+        font-weight: bold;
+    }
+    
+    #market-info {
+        display: none;
+    }
+    
+    /* 页脚 */
+    .footer {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 10px;
+        color: var(--grid-color);
+        border-top: 1px solid var(--grid-color);
+        padding-top: 10px;
+    }
+    
+    /* CRT效果 */
+    .crt-effect {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+        background-size: 100% 4px;
+        z-index: 1000;
+        pointer-events: none;
+        mix-blend-mode: overlay;
+        opacity: 0.15;
+    }
+    
+    /* 提示框 */
+    .tooltip {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        text-align: center;
+        border: 1px solid var(--accent-color);
+        border-radius: 4px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -60px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 10px;
+    }
+    
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
+    
+    /* 发光动画 */
+    .glow {
+        animation: glow 1.5s ease-in-out infinite alternate;
+    }
+    
+    @keyframes glow {
+        from {
+            text-shadow: 0 0 5px var(--accent-color), 0 0 10px var(--accent-color);
+        }
+        to {
+            text-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color), 0 0 30px var(--accent-color);
+        }
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        body {
+            overflow: auto;
+            height: auto;
+        }
+        
+        .container {
+            height: auto;
+            overflow: visible;
+        }
+        
+        .main-content {
+            flex-direction: column-reverse;
+            overflow: visible;
+        }
+        
+        .chart-section {
+            flex: initial;
+            min-height: 400px;
+        }
+        
+        .controls-section {
+            flex: initial;
+            max-width: 100%;
+        }
+    }
+    
+    /* 添加操作建议的样式 */
+    .advice-text {
+        font-weight: bold;
+        color: #FFFF00; /* 默认黄色 */
+        text-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
+    }
+    
+    /* 添加盘面趋势样式 */
+    .market-trends-container {
+        background-color: var(--card-bg);
+        border: 1px solid var(--accent-color);
+        border-radius: 4px;
+        padding: 8px;
+        margin: 10px 0;
+    }
+    
+    .market-trends {
+        font-size: 11px;
+        margin-top: 5px;
+    }
+    
+    .trend-category {
+        margin-bottom: 4px;
+    }
+    
+    .trend-title {
+        font-weight: bold;
+        color: var(--accent-color);
+    }
+    
+    .trend-symbols {
+        color: var(--text-color);
+    }
+    
+    .trend-count {
+        color: #FFFF00;
+    }
+    
+    .trend-yellow {
+        color: #FFFF00;
+    }
+    
+    .trend-green {
+        color: #32CD32;
+    }
+    
+    .trend-neutral {
+        color: #00FFFF;
+    }
+    
+    .trend-green-down {
+        color: #32CD32;
+    }
+    
+    .trend-blue {
+        color: #4169E1;
+    }
+    
+    .loading-trends {
+        font-style: italic;
+        color: var(--accent-color);
+        text-align: center;
+    }
+    
+    /* 添加刷新按钮样式 */
+    .trends-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .trends-header h3 {
+        font-size: 14px;
+        color: var(--accent-color);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .refresh-btn {
+        background-color: var(--button-bg);
+        color: var(--accent-color);
+        border: 1px solid var(--accent-color);
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-size: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .refresh-btn:hover {
+        background-color: var(--button-hover);
+        box-shadow: 0 0 5px var(--accent-color);
+    }
+    
+    .refresh-btn i {
+        font-size: 10px;
+    }
+    
+    .trend-message {
+        text-align: center;
+        color: var(--text-color);
+        font-style: italic;
+        font-size: 10px;
+    }
+    
+    /* 加载中动画 */
+    .refresh-btn.loading i {
+        animation: spin 1s linear infinite;
+    }
+</style> 
