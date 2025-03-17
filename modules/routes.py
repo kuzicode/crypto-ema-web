@@ -75,9 +75,10 @@ def init_routes(app):
             trends = {
                 'above_ma4': [],    # 突破上涨黄线
                 'above_ma3': [],    # 突破上涨绿线
-                'between_ma3_ma5': [],  # MA线之间
-                'below_ma5': [],    # 到达底部绿线
-                'below_ma6': []     # 到达底部蓝线
+                'between_ma2_ma3': [],  # 盘整区上行
+                'between_ma5_ma2': [],  # 盘整区下行
+                'below_ma5': [],    # 跌破底部绿线
+                'below_ma6': []     # 跌破底部蓝线
             }
             
             # 使用线程池并行获取数据

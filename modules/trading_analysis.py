@@ -389,8 +389,10 @@ def token_trend(symbol, interval):
             return {'token_trend': 'above_ma4'}
         elif price > ma3:
             return {'token_trend': 'above_ma3'}
-        elif price > ma5:
-            return {'token_trend': 'between_ma3_ma5'}
+        elif price > ma2 and price < ma3:
+            return {'token_trend': 'between_ma2_ma3'}  # 盘整区上行
+        elif price < ma2 and price > ma5:
+            return {'token_trend': 'between_ma5_ma2'}  # 盘整区下行
         elif price > ma6:
             return {'token_trend': 'below_ma5'}
         else:

@@ -68,7 +68,8 @@ if not EMAIL_CONFIG.get("password") and os.environ.get("QQ_EMAIL_AUTH_CODE"):
 EMA_STATUS_MAP = {
     "above_ma4": "突破上涨黄线",
     "above_ma3": "突破上涨绿线",
-    "between_ma3_ma5": "MA线盘整区",
+    "between_ma2_ma3": "盘整区上行",
+    "between_ma5_ma2": "盘整区下行",
     "below_ma5": "跌破底部绿线",
     "below_ma6": "跌破底部蓝线"
 }

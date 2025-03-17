@@ -331,11 +331,18 @@
                     <span class="trend-symbols">${trends.above_ma3.join(', ') || '无'}</span>
                 </div>
                 <div class="trend-category">
-                    <span class="trend-title trend-neutral">
-                        MA线盘整区
-                        <span class="trend-count">(${trends.between_ma3_ma5.length})</span>:
+                    <span class="trend-title trend-neutral-up">
+                        盘整区上行
+                        <span class="trend-count">(${trends.between_ma2_ma3.length})</span>:
                     </span>
-                    <span class="trend-symbols">${trends.between_ma3_ma5.join(', ') || '无'}</span>
+                    <span class="trend-symbols">${trends.between_ma2_ma3.join(', ') || '无'}</span>
+                </div>
+                <div class="trend-category">
+                    <span class="trend-title trend-neutral-down">
+                        盘整区下行
+                        <span class="trend-count">(${trends.between_ma5_ma2.length})</span>:
+                    </span>
+                    <span class="trend-symbols">${trends.between_ma5_ma2.join(', ') || '无'}</span>
                 </div>
                 <div class="trend-category">
                     <span class="trend-title trend-green-down">
