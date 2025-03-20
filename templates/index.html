@@ -369,6 +369,25 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* 图表时间戳样式 */
+        .chart-timestamp {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background-color: rgba(0, 0, 68, 0.8);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: var(--accent-color);
+            z-index: 10;
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+        }
+        
+        .chart-timestamp i {
+            margin-right: 5px;
+        }
+        
         /* 市场信息卡片 */
         .info-card {
             background-color: rgba(0, 0, 68, 0.7);
@@ -654,6 +673,10 @@
                                 选择或搜索加密货币，然后点击生成图表按钮开始
                             </p>
                         </div>
+                        <!-- 添加时间戳显示 -->
+                        <div id="chart-timestamp" class="chart-timestamp" style="display: none;">
+                            <i class="fas fa-clock"></i> <span id="timestamp-value">--</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -934,6 +957,7 @@
                 chartImage.style.display = 'none';
                 initialMessage.style.display = 'none';
                 loading.style.display = 'block';
+                document.getElementById('chart-timestamp').style.display = 'none';
                 setStatus('获取数据中...');
                 
                 // 禁用按钮
@@ -962,6 +986,14 @@
                         chartImage.src = 'data:image/png;base64,' + data.image;
                         chartImage.style.display = 'block';
                         setStatus('图表生成成功！');
+                        
+                        // 显示时间戳
+                        if (data.timestamp) {
+                            const timestampElement = document.getElementById('chart-timestamp');
+                            const timestampValueElement = document.getElementById('timestamp-value');
+                            timestampValueElement.textContent = `数据更新时间: ${data.timestamp}`;
+                            timestampElement.style.display = 'block';
+                        }
                         
                         // 更新币种分析信息
                         if (data.market_info) {
@@ -1002,6 +1034,7 @@
                         initialMessage.style.display = 'block';
                         setStatus('错误：' + data.error, true);
                         coinAnalysis.style.display = 'none';
+                        document.getElementById('chart-timestamp').style.display = 'none';
                     }
                 })
                 .catch(error => {
@@ -1013,6 +1046,7 @@
                     
                     setStatus('错误：' + error.message, true);
                     coinAnalysis.style.display = 'none';
+                    document.getElementById('chart-timestamp').style.display = 'none';
                 });
             };
             

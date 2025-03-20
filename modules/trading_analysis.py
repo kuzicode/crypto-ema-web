@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import base64
 import io
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -20,11 +21,32 @@ def get_klines(symbol, interval, limit=1000):
         'limit': limit
     }
     
-    response = requests.get(url, params=params)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        logger.error(f"Failed to retrieve K-line data: {response.text}")
+    try:
+        # 设置15秒超时，避免长时间阻塞
+        logger.info(f"正在获取 {symbol} {interval} K线数据...")
+        response = requests.get(url, params=params, timeout=15)
+        
+        # 检查HTTP状态码
+        if response.status_code == 200:
+            data = response.json()
+            logger.info(f"成功获取 {symbol} K线数据，获取到 {len(data)} 条记录")
+            return data
+        elif response.status_code == 429:
+            logger.error(f"API请求频率限制: {response.text}")
+            # 如果是频率限制，等待一分钟后重试
+            time.sleep(60)
+            return get_klines(symbol, interval, limit)
+        else:
+            logger.error(f"获取K线数据失败: HTTP {response.status_code}, {response.text}")
+            return []
+    except requests.exceptions.Timeout:
+        logger.error(f"获取 {symbol} K线数据超时")
+        return []
+    except requests.exceptions.ConnectionError:
+        logger.error(f"连接API服务器失败，可能是网络问题")
+        return []
+    except Exception as e:
+        logger.error(f"获取K线数据时出现异常: {e}")
         return []
 
 # 辅助函数 - 解析币安K线数据的格式
@@ -301,7 +323,8 @@ class KlineBot:
                 
             ax1.xaxis.set_visible(False)
 
-            ax1.set_title(f'{self.symbol} Moving Averages', color='#00FF00', fontsize=16)
+            current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            ax1.set_title(f'{self.symbol} Moving Averages - Last Update: {current_time}', color='#00FF00', fontsize=16)
             ax1.set_ylabel('Price', color='#00FF00')
             ax1.legend()
             

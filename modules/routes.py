@@ -28,12 +28,14 @@ def init_routes(app):
             
             interval = request.form.get('interval', '4h')  # 默认使用4小时
             
-            # 检查是否已有该交易对的机器人实例
+            # 生成唯一键
             bot_key = f"{symbol}_{interval}"
-            if bot_key not in active_bots:
-                active_bots[bot_key] = KlineBot(symbol, interval)
             
-            bot = active_bots[bot_key]
+            # 强制重新创建bot实例，确保每次获取最新数据
+            bot = KlineBot(symbol, interval)
+            active_bots[bot_key] = bot
+            
+            # 获取图表数据
             img_str, error = bot.generate_plot()
             
             if error:
@@ -47,11 +49,17 @@ def init_routes(app):
                 "price": f"{bot.indicators['Close'].iloc[-1]:.2f} USDT"
             }
             
+            # 添加当前服务器时间
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            logger.info(f"获取了 {symbol} 的最新数据，时间: {current_time}")
+            
             return jsonify({
                 'success': True, 
                 'image': img_str,
                 'market_info': market_info,
-                'analysis': market_analysis
+                'analysis': market_analysis,
+                'timestamp': current_time  # 添加时间戳到响应
             })
         except Exception as e:
             logger.error(f"获取图表时出错: {e}")
