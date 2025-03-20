@@ -3,7 +3,7 @@ import logging
 from modules.routes import init_routes
 import os
 import time
-import datetime
+from datetime import datetime, timedelta
 
 # 配置日志
 logging.basicConfig(
@@ -24,9 +24,9 @@ def create_app():
     """创建并配置Flask应用"""
     app = Flask(__name__)
     
-    # 输出当前北京时间
-    beijing_time = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
-    logger.info(f"应用启动时间(北京时间): {beijing_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    # 输出当前北京时间（不使用timezone类）
+    now = datetime.utcnow() + timedelta(hours=8)
+    logger.info(f"应用启动时间(北京时间): {now.strftime('%Y-%m-%d %H:%M:%S')}")
     
     # 初始化路由
     app = init_routes(app)

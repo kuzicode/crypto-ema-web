@@ -323,8 +323,8 @@ class KlineBot:
                 
             ax1.xaxis.set_visible(False)
 
-            # 添加生成时间到标题，确保使用北京时间
-            beijing_time = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
+            # 添加生成时间到标题，使用UTC+8小时作为北京时间
+            beijing_time = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
             formatted_time = beijing_time.strftime('%Y-%m-%d %H:%M:%S')
             ax1.set_title(f'{self.symbol} Moving Averages - Last Update: {formatted_time}', color='#00FF00', fontsize=16)
             ax1.set_ylabel('Price', color='#00FF00')

@@ -1,7 +1,7 @@
 from flask import render_template, jsonify, request
 import logging
 import concurrent.futures
-from datetime import datetime
+from datetime import datetime, timedelta
 from modules.trading_analysis import KlineBot, token_trend
 
 logger = logging.getLogger(__name__)
@@ -50,8 +50,7 @@ def init_routes(app):
             }
             
             # 添加当前服务器时间(北京时间)
-            beijing_time = datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
-            current_time = beijing_time.strftime('%Y-%m-%d %H:%M:%S')
+            current_time = (datetime.utcnow() + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
             
             logger.info(f"获取了 {symbol} 的最新数据，时间: {current_time}")
             
