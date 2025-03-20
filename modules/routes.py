@@ -49,8 +49,9 @@ def init_routes(app):
                 "price": f"{bot.indicators['Close'].iloc[-1]:.2f} USDT"
             }
             
-            # 添加当前服务器时间
-            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            # 添加当前服务器时间(北京时间)
+            beijing_time = datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
+            current_time = beijing_time.strftime('%Y-%m-%d %H:%M:%S')
             
             logger.info(f"获取了 {symbol} 的最新数据，时间: {current_time}")
             
