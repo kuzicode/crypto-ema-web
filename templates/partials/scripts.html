@@ -369,6 +369,154 @@
         // 添加刷新盘面趋势按钮的事件监听器
         refreshTrendsBtn.addEventListener('click', fetchMarketTrends);
         
+        // 币价变动提醒相关功能
+        const alertLoading = document.getElementById('alert-loading');
+        const noAlerts = document.getElementById('no-alerts');
+        const alertsList = document.getElementById('alerts-list');
+        const refreshAlertsBtn = document.getElementById('refresh-alerts-btn');
+        
+        // 获取币价提醒记录
+        const fetchPriceAlerts = () => {
+            // 显示加载状态
+            alertLoading.style.display = 'block';
+            noAlerts.style.display = 'none';
+            alertsList.style.display = 'none';
+            
+            // 添加加载动画
+            refreshAlertsBtn.classList.add('loading');
+            refreshAlertsBtn.disabled = true;
+            
+            // 获取提醒记录
+            fetch('/get_price_alerts')
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    // 隐藏加载状态
+                    alertLoading.style.display = 'none';
+                    refreshAlertsBtn.classList.remove('loading');
+                    refreshAlertsBtn.disabled = false;
+                    
+                    if (data.success) {
+                        if (data.alerts && data.alerts.length > 0) {
+                            displayPriceAlerts(data.alerts);
+                            alertsList.style.display = 'flex';
+                        } else {
+                            noAlerts.style.display = 'block';
+                        }
+                    } else {
+                        noAlerts.style.display = 'block';
+                        noAlerts.innerHTML = `<p class="error">加载提醒记录失败: ${data.error || '未知错误'}</p>`;
+                    }
+                })
+                .catch(error => {
+                    alertLoading.style.display = 'none';
+                    noAlerts.style.display = 'block';
+                    noAlerts.innerHTML = `<p class="error">加载提醒记录失败: ${error.message}</p>`;
+                    refreshAlertsBtn.classList.remove('loading');
+                    refreshAlertsBtn.disabled = false;
+                });
+        };
+        
+        // 显示币价提醒记录
+        const displayPriceAlerts = (alerts) => {
+            // 先按时间降序排序（最新的在前面）
+            const sortedAlerts = [...alerts].sort((a, b) => {
+                return new Date(b.timestamp) - new Date(a.timestamp);
+            });
+            
+            // 生成HTML
+            let html = '';
+            
+            // 跟踪前一条记录的EMA状态，用于比较变化
+            let prevEmaStatus = {};
+            
+            // 如果有多于一条记录，获取第二条记录的EMA状态（因为排序后，索引1是时间上的前一条）
+            if (sortedAlerts.length > 1 && sortedAlerts[1].data) {
+                sortedAlerts[1].data.forEach(token => {
+                    prevEmaStatus[token.Token] = token.EMA;
+                });
+            }
+            
+            sortedAlerts.forEach((alert, alertIndex) => {
+                // 格式化时间
+                const date = new Date(alert.timestamp);
+                const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+                
+                // 创建提醒项HTML
+                html += `
+                    <div class="alert-item">
+                        <div class="alert-time">
+                            <span>${formattedDate}</span>
+                            <span class="alert-badge ${alertIndex === 0 ? 'latest-badge' : ''}">
+                                ${alertIndex === 0 ? '<i class="fas fa-bell"></i> 最新' : 'EMA状态变化'}
+                            </span>
+                        </div>
+                        <div class="alert-tokens">
+                `;
+                
+                // 添加各个代币信息
+                if (alert.data && alert.data.length > 0) {
+                    alert.data.forEach(token => {
+                        // 获取EMA状态的CSS类
+                        let emaClass = 'ema-between-ma5-ma2'; // 默认类
+                        
+                        // 根据EMA状态设置相应的CSS类
+                        if (token.EMA === '突破上涨黄线') {
+                            emaClass = 'ema-above-ma4';
+                        } else if (token.EMA === '突破上涨绿线') {
+                            emaClass = 'ema-above-ma3';
+                        } else if (token.EMA === '盘整区上行') {
+                            emaClass = 'ema-between-ma2-ma3';
+                        } else if (token.EMA === '盘整区下行') {
+                            emaClass = 'ema-between-ma5-ma2';
+                        } else if (token.EMA === '跌破底部绿线') {
+                            emaClass = 'ema-below-ma5';
+                        } else if (token.EMA === '跌破底部蓝线') {
+                            emaClass = 'ema-below-ma6';
+                        }
+                        
+                        // 检查是否为最新记录，且EMA状态发生变化
+                        let statusChanged = false;
+                        let statusChangeText = '';
+                        
+                        if (alertIndex === 0 && prevEmaStatus[token.Token] && prevEmaStatus[token.Token] !== token.EMA) {
+                            statusChanged = true;
+                            statusChangeText = `<i class="fas fa-exchange-alt status-icon"></i> ${prevEmaStatus[token.Token]} → ${token.EMA}`;
+                        }
+                        
+                        html += `
+                            <div class="token-card ${emaClass}">
+                                <div class="token-info">
+                                    <span class="token-symbol">${token.Token}</span>
+                                    <span class="token-price">${token.Price} USDT</span>
+                                </div>
+                                <div class="token-ema ${emaClass} ${statusChanged ? 'status-changed' : ''}">
+                                    ${statusChanged ? statusChangeText : token.EMA}
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += `<div class="no-tokens">无代币数据</div>`;
+                }
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // 更新DOM
+            alertsList.innerHTML = html;
+        };
+        
+        // 添加刷新提醒记录按钮的事件监听器
+        if (refreshAlertsBtn) {
+            refreshAlertsBtn.addEventListener('click', fetchPriceAlerts);
+        }
+        
         // 首次加载时自动生成图表
         setTimeout(() => {
             if (!symbolInput.value) {
@@ -376,8 +524,24 @@
             }
             highlightActiveSymbol(symbolInput.value);
             debouncedFetchData();
-            // 页面加载时自动获取盘面趋势(保留，但可以被按钮替代)
+            // 页面加载时自动获取盘面趋势
             fetchMarketTrends();
+            
+            // 如果在币价提醒页面，自动加载提醒记录
+            if (window.location.hash === '#price_alert' && refreshAlertsBtn) {
+                fetchPriceAlerts();
+            }
         }, 500);
+        
+        // 添加导航变化事件监听器，切换到币价提醒页面时自动加载数据
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                if (this.getAttribute('data-page') === 'price_alert' && refreshAlertsBtn) {
+                    setTimeout(() => {
+                        fetchPriceAlerts();
+                    }, 100);
+                }
+            });
+        });
     });
 </script> 

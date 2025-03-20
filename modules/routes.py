@@ -64,7 +64,7 @@ def init_routes(app):
             # 获取请求数据
             data = request.json
             symbols = data.get('symbols', [])
-            interval = data.get('interval', '4h')  # 默认使用4小时
+            interval = data.get('interval', '4h')  # 默认使用4小时周期
             
             # 确保所有币种都以USDT结尾
             symbols = [symbol.upper() + 'USDT' if not symbol.upper().endswith('USDT') else symbol.upper() for symbol in symbols]
@@ -105,6 +105,53 @@ def init_routes(app):
             })
         except Exception as e:
             logger.error(f"获取盘面趋势时出错: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            })
+            
+    @app.route('/get_price_alerts', methods=['GET'])
+    def get_price_alerts():
+        """获取币价变动提醒记录"""
+        try:
+            import os
+            import json
+            
+            # 定义JSON文件路径
+            json_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'mail_alerts.json')
+            
+            # 检查文件是否存在
+            if not os.path.exists(json_file):
+                logger.warning(f"提醒记录文件不存在: {json_file}")
+                return jsonify({
+                    'success': True,
+                    'alerts': []
+                })
+            
+            # 读取JSON文件内容
+            try:
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    alerts = json.load(f)
+                    
+                logger.info(f"成功加载提醒记录，共 {len(alerts)} 条")
+                return jsonify({
+                    'success': True,
+                    'alerts': alerts
+                })
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON解析错误: {e}")
+                return jsonify({
+                    'success': False,
+                    'error': f"无法解析JSON文件: {str(e)}"
+                })
+            except Exception as e:
+                logger.error(f"读取文件时出错: {e}")
+                return jsonify({
+                    'success': False,
+                    'error': f"读取文件时出错: {str(e)}"
+                })
+        except Exception as e:
+            logger.error(f"获取币价提醒记录时出错: {e}")
             return jsonify({
                 'success': False,
                 'error': str(e)

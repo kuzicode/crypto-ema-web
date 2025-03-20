@@ -1,0 +1,29 @@
+<!-- 币价变动提醒页面 -->
+<div id="price_alert-page" class="page-content">
+    <div class="alert-section">
+        <div class="alert-container">
+            <div class="alert-header">
+                <h2 class="alert-title">
+                    <i class="fas fa-bell"></i> 币价变动提醒
+                </h2>
+                <div class="alert-actions">
+                    <button id="refresh-alerts-btn" class="refresh-btn tooltip">
+                        <i class="fas fa-sync-alt"></i>
+                        <span class="tooltiptext">刷新提醒记录</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="alert-content" class="alert-content">
+                <div class="loading" id="alert-loading">
+                    <i class="fas fa-spinner"></i>
+                    <p class="glow">加载提醒记录中...</p>
+                </div>
+                <div id="no-alerts" class="no-alerts" style="display: none;">
+                    <p>暂无提醒记录</p>
+                </div>
+                <div id="alerts-list" class="alerts-list" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div> 
