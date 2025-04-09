@@ -158,6 +158,13 @@
                     // 更新币种分析信息
                     if (data.market_info) {
                         document.getElementById('current-price').textContent = data.market_info.price;
+                        
+                        // 更新MA线价格显示
+                        document.getElementById('ma2-price').textContent = data.market_info.ma2.toFixed(2) + ' USDT';
+                        document.getElementById('ma3-price').textContent = data.market_info.ma3.toFixed(2) + ' USDT';
+                        document.getElementById('ma4-price').textContent = data.market_info.ma4.toFixed(2) + ' USDT';
+                        document.getElementById('ma5-price').textContent = data.market_info.ma5.toFixed(2) + ' USDT';
+                        document.getElementById('ma6-price').textContent = data.market_info.ma6.toFixed(2) + ' USDT';
                     }
                     
                     // 更新分析结果

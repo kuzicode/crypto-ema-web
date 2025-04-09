@@ -35,3 +35,4 @@ htmlcov/
 
 # 本地开发配置
 .DS_Store
+.backup

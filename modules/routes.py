@@ -44,15 +44,22 @@ def init_routes(app):
             # 获取市场分析
             market_analysis = bot.generate_market_analysis()
             
-            # 获取当前最新价格
+            # 获取当前最新价格和MA线值
+            latest = bot.indicators.iloc[-1]
             market_info = {
-                "price": f"{bot.indicators['Close'].iloc[-1]:.2f} USDT"
+                "price": f"{latest['Close']:.2f} USDT",
+                "ma2": float(latest['MA2']),
+                "ma3": float(latest['MA3']),
+                "ma4": float(latest['MA4']),
+                "ma5": float(latest['MA5']),
+                "ma6": float(latest['MA6'])
             }
             
             # 添加当前服务器时间(北京时间)
             current_time = (datetime.utcnow() + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
             
             logger.info(f"获取了 {symbol} 的最新数据，时间: {current_time}")
+            logger.info(f"MA线价格数据: {market_info}")
             
             return jsonify({
                 'success': True, 
