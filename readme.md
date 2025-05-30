@@ -8,8 +8,9 @@
 1. Create project directory and set up virtual environment:
 
 ```bash
-mkdir -p crypto-ema-web/templates
+git clone https://github.com/kuzicode/crypto-ema-web
 cd crypto-ema-web
+sudo apt install python3.10-venv
 python3 -m venv .venv
 source .venv/bin/activate
 ```
@@ -23,7 +24,7 @@ pip install -r requirements.txt
 3. Run the application:
 
 ```bash
-python app.py
+python3 app.py
 ```
 
 4. Access in browser:
