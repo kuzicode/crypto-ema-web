@@ -29,6 +29,9 @@ def get_klines(symbol, interval, limit=1000):
         # 检查HTTP状态码
         if response.status_code == 200:
             data = response.json()
+            if not data:
+                logger.error(f"获取 {symbol} K线数据返回空列表")
+                return []
             logger.info(f"成功获取 {symbol} K线数据，获取到 {len(data)} 条记录")
             return data
         elif response.status_code == 429:
@@ -295,7 +298,7 @@ class KlineBot:
     def generate_plot(self):
         try:
             if self.indicators.empty:
-                return None, f"No data available for {self.symbol}. Please check if this symbol exists on OKX."
+                return None, f"No data available for {self.symbol}. Please check if this symbol exists on Binance."
                 
             df = self.indicators
             fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(13, 8), gridspec_kw={'height_ratios': [3, 1]})
