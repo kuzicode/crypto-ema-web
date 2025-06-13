@@ -14,43 +14,54 @@ logger = logging.getLogger(__name__)
 
 # REST API: 币安 API K-line数据 
 def get_klines(symbol, interval, limit=1000):
-    url = "https://api.binance.com/api/v3/klines"
+    # 使用备用域名列表
+    api_urls = [
+        "https://api1.binance.com/api/v3/klines",
+        "https://api2.binance.com/api/v3/klines",
+        "https://api3.binance.com/api/v3/klines",
+        "https://api4.binance.com/api/v3/klines"
+    ]
+    
     params = {
         'symbol': symbol,
         'interval': interval,
         'limit': limit
     }
     
-    try:
-        # 设置15秒超时，避免长时间阻塞
-        logger.info(f"正在获取 {symbol} {interval} K线数据...")
-        response = requests.get(url, params=params, timeout=15)
-        
-        # 检查HTTP状态码
-        if response.status_code == 200:
-            data = response.json()
-            if not data:
-                logger.error(f"获取 {symbol} K线数据返回空列表")
-                return []
-            logger.info(f"成功获取 {symbol} K线数据，获取到 {len(data)} 条记录")
-            return data
-        elif response.status_code == 429:
-            logger.error(f"API请求频率限制: {response.text}")
-            # 如果是频率限制，等待一分钟后重试
-            time.sleep(60)
-            return get_klines(symbol, interval, limit)
-        else:
-            logger.error(f"获取K线数据失败: HTTP {response.status_code}, {response.text}")
-            return []
-    except requests.exceptions.Timeout:
-        logger.error(f"获取 {symbol} K线数据超时")
-        return []
-    except requests.exceptions.ConnectionError:
-        logger.error(f"连接API服务器失败，可能是网络问题")
-        return []
-    except Exception as e:
-        logger.error(f"获取K线数据时出现异常: {e}")
-        return []
+    for url in api_urls:
+        try:
+            # 设置15秒超时，避免长时间阻塞
+            logger.info(f"正在通过 {url} 获取 {symbol} {interval} K线数据...")
+            response = requests.get(url, params=params, timeout=15)
+            
+            # 检查HTTP状态码
+            if response.status_code == 200:
+                data = response.json()
+                if not data:
+                    logger.error(f"获取 {symbol} K线数据返回空列表")
+                    continue
+                logger.info(f"成功获取 {symbol} K线数据，获取到 {len(data)} 条记录")
+                return data
+            elif response.status_code == 429:
+                logger.error(f"API请求频率限制: {response.text}")
+                # 如果是频率限制，等待一分钟后重试
+                time.sleep(60)
+                continue
+            else:
+                logger.error(f"通过 {url} 获取K线数据失败: HTTP {response.status_code}, {response.text}")
+                continue
+        except requests.exceptions.Timeout:
+            logger.error(f"通过 {url} 获取 {symbol} K线数据超时")
+            continue
+        except requests.exceptions.ConnectionError:
+            logger.error(f"连接 {url} 失败，尝试下一个域名")
+            continue
+        except Exception as e:
+            logger.error(f"通过 {url} 获取K线数据时出现异常: {e}")
+            continue
+    
+    logger.error(f"所有API域名都无法访问，请检查网络连接或使用代理")
+    return []
 
 # 辅助函数 - 解析币安K线数据的格式
 def parser_klines(kline):
