@@ -8,9 +8,10 @@
 1. Create project directory and set up virtual environment:
 
 ```bash
+sudo apt update && sudo apt upgrade -y
 git clone https://github.com/kuzicode/crypto-ema-web
 cd crypto-ema-web
-sudo apt install python3.10-venv
+sudo apt install python3.12-venv -y
 python3 -m venv .venv
 source .venv/bin/activate
 ```
@@ -18,7 +19,7 @@ source .venv/bin/activate
 2. Install dependencies:
 
 ```bash
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 3. Run the application:
@@ -31,6 +32,12 @@ python3 app.py
 
 ```
 http://localhost:6969
+```
+
+open ufw
+
+```
+sudo ufw allow 6969
 ```
 
 ## Dependencies
